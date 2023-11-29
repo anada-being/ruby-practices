@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'date'
-# require 'Enumerable'
 require 'optparse'
 opt = OptionParser.new
 option ={}
@@ -43,8 +42,6 @@ puts  '日　月　火　水　木　金　土'
 
 
 while write_date <= lastday
-
-# 1日が何曜日かによって空白を変える
   if first_cwday != 7
     while first_cwday > 0
       print "　　"
