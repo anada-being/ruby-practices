@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-number = 0
-while number < 20
-  number += 1
+(1..20).each { |number| \
   if (number % 3).zero? && (number % 5).zero?
     puts 'FizzBuzz'
   elsif (number % 3).zero?
@@ -12,4 +10,4 @@ while number < 20
   else
     puts number
   end
-end
+}
