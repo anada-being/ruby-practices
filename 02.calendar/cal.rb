@@ -30,10 +30,10 @@ new_year = if option[:y].nil?
              option[:y]
            end
 
-last_day = Date.new(new_year, now_month, -1).day
-write_date = Date.new(new_year, now_month, 1).day
-write_youbi = Date.new(new_year, now_month, 1).cwday
-first_cwday = Date.new(new_year, now_month, 1).cwday
+last_day = Date.new(new_year, new_month, -1).day
+write_date = Date.new(new_year, new_month, 1).day
+write_youbi = Date.new(new_year, new_month, 1).cwday
+first_cwday = Date.new(new_year, new_month, 1).cwday
 
 puts "   #{new_month} #{new_year}"
 puts 'Su Mo Tu We Th Fr Sa'
