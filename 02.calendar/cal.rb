@@ -15,34 +15,32 @@ opt.parse(ARGV)
 
 example_day = Date.today
 
-if option[:m].nil?
-  now_month = example_day.month
-elsif option[:m] < 1 || option[:m] > 12
-  puts '無効です'
-  now_month = example_day.month
-else
-  now_month = option[:m]
-end
-if option[:y].nil?
-  now_year = example_day.year
-elsif  option[:y] < 1970 || option[:y] > 2100
-  puts '範囲外です'
-  now_year = option[:y]
-else
-  now_year = option[:y]
-end
+new_month = if option[:m].nil?
+              example_day.month
+            elsif option[:m] < 1 || option[:m] > 12
+              example_day.month
+            else
+              option[:m]
+            end
+new_year = if option[:y].nil?
+             example_day.year
+           elsif option[:y] < 1970 || option[:y] > 2100
+             example_day.year
+           else
+             option[:y]
+           end
 
-lastday = Date.new(now_year, now_month, -1).day
-write_date = Date.new(now_year, now_month, 1).day
-write_youbi = Date.new(now_year, now_month, 1).cwday
-first_cwday = Date.new(now_year, now_month, 1).cwday
+last_day = Date.new(new_year, now_month, -1).day
+write_date = Date.new(new_year, now_month, 1).day
+write_youbi = Date.new(new_year, now_month, 1).cwday
+first_cwday = Date.new(new_year, now_month, 1).cwday
 
-puts "   #{now_month} #{now_year}"
+puts "   #{new_month} #{new_year}"
 puts 'Su Mo Tu We Th Fr Sa'
 
-first_cwday.times { print '   ' } if first_cwday != 7
+print '   ' * first_cwday if first_cwday != 7
 
-(1..lastday).each do
+(1..last_day).each do
   if write_date > 9
     print "#{write_date} "
   else
@@ -53,3 +51,4 @@ first_cwday.times { print '   ' } if first_cwday != 7
   write_youbi = write_youbi % 7
   puts "\n" if write_youbi.zero?
 end
+puts "\n"
