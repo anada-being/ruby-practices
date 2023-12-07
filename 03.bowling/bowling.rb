@@ -22,13 +22,13 @@ end
 point = 0
 frames.each_with_index do |frame, number|
   point += if frame[0] == 10 && number < 9 && !frames[number + 1].nil?
-             if frames[number + 1][0] == 10
+             if frames[number + 1][0] == 10 && !frames[number + 2].nil?
                20 + frames[number + 2][0]
              elsif number < 9 && frame[0] == 10
                10 + frames[number + 1].sum
              end
-           elsif number < 9 && frame.sum == 10
-             frames[number + 1][0] + 10
+           elsif number < 9 && frame.sum == 10 && !frames[number + 1].nil?
+             10 + frames[number + 1][0]
            else
              frame.sum
            end
