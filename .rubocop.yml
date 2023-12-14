@@ -2,5 +2,3 @@ inherit_gem:
   rubocop-fjord:
     - "config/rubocop.yml"
 
-Layout/EndOfLine:
-  Enabled: False

@@ -2,8 +2,8 @@
 
 # frozen_string_literal: true
 
-score = ARGV[0]
-scores = score.split(/,/)
+argument_scores = ARGV[0]
+scores = argument_scores.split(/,/)
 shots = []
 scores.each do |s|
   if s == 'X'
@@ -14,23 +14,24 @@ scores.each do |s|
   end
 end
 
-frames = []
-shots.each_slice(2) do |s|
-  frames << s
-end
+frames = shots.each_slice(2).to_a
 
+STRIKE = 10
+SPARE = 10
 point = 0
-frames.each_with_index do |frame, number|
-  point += if frame[0] == 10 && number < 9 && !frames[number + 1].nil?
-             if frames[number + 1][0] == 10 && !frames[number + 2].nil?
-               20 + frames[number + 2][0]
-             elsif number < 9 && frame[0] == 10
-               10 + frames[number + 1].sum
+frames.each_with_index do |frame, index|
+  next_frame = frames[index + 1]
+  point += if frame[0] == STRIKE && index < 9
+             if next_frame[0] == STRIKE
+               20 + frames[index + 2][0]
+             else
+               10 + next_frame.sum
              end
-           elsif number < 9 && frame.sum == 10 && !frames[number + 1].nil?
-             10 + frames[number + 1][0]
+           elsif frame.sum == SPARE && index < 9
+             10 + next_frame[0]
            else
              frame.sum
            end
 end
 puts point
+
