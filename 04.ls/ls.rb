@@ -8,7 +8,7 @@ def file_import
   @max_length = 0
   @array_files = []
   Dir.foreach('.') do |item|
-    next if item.start_with?(".")
+    next if item.start_with?('.')
 
     @array_files << item
     @max_length = item.length if @max_length < item.length
