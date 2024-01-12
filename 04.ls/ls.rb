@@ -5,9 +5,7 @@
 MAX_ROW = 3
 
 def file_import
-  array_files = Dir.foreach('.').to_a.filter { |file| !file.start_with?('.') }
-  max_length = array_files.map(&:length).max
-  [array_files, max_length]
+  Dir.foreach('.').to_a.filter { |file| !file.start_with?('.') }
 end
 
 def file_convert(array_files)
@@ -22,7 +20,8 @@ def file_convert(array_files)
   tate_files
 end
 
-def file_export(tate_files, max_length)
+def file_export(tate_files)
+  max_length = tate_files.map { |files| files.map(&:length).max }.max
   tate_files.each do |files|
     files.each do |file_name|
       print file_name
@@ -32,6 +31,6 @@ def file_export(tate_files, max_length)
   end
 end
 
-array_files, max_length = file_import
+array_files = file_import
 tate_files = file_convert(array_files)
-file_export(tate_files, max_length)
+file_export(tate_files)
