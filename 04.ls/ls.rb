@@ -39,7 +39,7 @@ end
 
 opt = OptionParser.new
 params = {}
-opt.on('-a') {|v| params[:a] = v}
+opt.on('-a') { |v| params[:a] = v }
 opt.parse(ARGV)
 
 array_files = params[:a] ? all_file_import : file_import
