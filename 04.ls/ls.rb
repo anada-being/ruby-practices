@@ -38,14 +38,10 @@ def file_export(tate_files)
 end
 
 opt = OptionParser.new
-opt.on('-a') do
-  array_files = all_file_import
-  tate_files = file_convert(array_files)
-  file_export(tate_files)
-  exit
-end
+params = {}
+opt.on('-a') {|v| params[:a] = v}
 opt.parse(ARGV)
 
-array_files = file_import
+array_files = params[:a] ? all_file_import : file_import
 tate_files = file_convert(array_files)
 file_export(tate_files)
