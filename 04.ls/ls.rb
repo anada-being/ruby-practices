@@ -2,10 +2,16 @@
 
 # frozen_string_literal: true
 
+require 'optparse'
+
 MAX_ROW = 3
 
 def file_import
   Dir.foreach('.').to_a.filter { |file| !file.start_with?('.') }
+end
+
+def all_file_import
+  Dir.foreach('.').to_a
 end
 
 def file_convert(array_files)
@@ -31,6 +37,11 @@ def file_export(tate_files)
   end
 end
 
-array_files = file_import
+opt = OptionParser.new
+params = {}
+opt.on('-a') { |v| params[:a] = v }
+opt.parse(ARGV)
+
+array_files = params[:a] ? all_file_import : file_import
 tate_files = file_convert(array_files)
 file_export(tate_files)
