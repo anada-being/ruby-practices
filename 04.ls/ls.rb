@@ -3,6 +3,7 @@
 # frozen_string_literal: true
 
 require 'optparse'
+require 'etc'
 
 MAX_ROW = 3
 
@@ -34,6 +35,7 @@ def file_stat(array_files)
       num -= 16_384
       file_mode << (+'d' << convert_mode(num.to_s(8)) << ' ')
     end
+    file_mode[i].concat(s.nlink.to_s, ' ', Etc.getpwuid(s.uid).name, ' ', Etc.getgrgid(s.gid).name, ' ', s.size.to_s, ' ', s.mtime.strftime('%b %e %R'), ' ', f)
   end
   file_mode
 end
@@ -72,7 +74,7 @@ array_files = params[:a] ? all_file_import : file_import
 array_files = array_files.reverse if params[:r]
 tate_files = file_convert(array_files)
 if params[:l]
-  p file_stat(array_files)
+  puts file_stat(array_files)
 else
   file_export(tate_files)
 end
