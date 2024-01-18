@@ -7,11 +7,11 @@ require 'optparse'
 MAX_ROW = 3
 
 def file_import
-  Dir.foreach('.').to_a.filter { |file| !file.start_with?('.') }
+  Dir.foreach('.').sort.to_a.filter { |file| !file.start_with?('.') }
 end
 
 def all_file_import
-  Dir.foreach('.').to_a
+  Dir.foreach('.').sort.to_a
 end
 
 # パーミッションの文字に変換
