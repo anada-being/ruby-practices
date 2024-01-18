@@ -40,8 +40,10 @@ end
 opt = OptionParser.new
 params = {}
 opt.on('-a') { |v| params[:a] = v }
+opt.on('-r') { |v| params[:r] = v }
 opt.parse(ARGV)
 
 array_files = params[:a] ? all_file_import : file_import
+array_files = array_files.reverse if params[:r]
 tate_files = file_convert(array_files)
 file_export(tate_files)
