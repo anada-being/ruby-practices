@@ -14,6 +14,34 @@ def all_file_import
   Dir.foreach('.').to_a
 end
 
+# パーミッションの文字に変換
+def convert_mode(num)
+  num.gsub(/./, '0' => '---', '1' => '--x', '2' => '-w-', '3' => '-wx', '4' => 'r--', '5' => 'r-x', '6' => 'rw-', '7' => 'rwx')
+end
+
+def file_stat(array_files)
+  file_stat = []
+  file_mode = []
+  array_files.each_with_index do |file, i|
+    file_stat << File.stat(file)
+    num = file_stat[i].mode
+    if num > 40_960 # シンボリックリンク
+      num -= 40_960
+      num = num.to_s(8) # 3桁の8進数
+      file_mode << 'l' << convert_mode(num)
+    elsif num > 32_768 # 通常ファイル
+      num -= 32_768
+      num = num.to_s(8)
+      file_mode << (+'-' << convert_mode(num))
+    elsif num > 16_384 # ディレクトリ
+      num -= 16_384
+      num = num.to_s(8)
+      file_mode << (+'d' << convert_mode(num))
+    end
+  end
+  file_mode
+end
+
 def file_convert(array_files)
   array_row = array_files.size / MAX_ROW
   remainder = array_files.size % MAX_ROW
@@ -41,9 +69,14 @@ opt = OptionParser.new
 params = {}
 opt.on('-a') { |v| params[:a] = v }
 opt.on('-r') { |v| params[:r] = v }
+opt.on('-l') { |v| params[:l] = v }
 opt.parse(ARGV)
 
 array_files = params[:a] ? all_file_import : file_import
 array_files = array_files.reverse if params[:r]
 tate_files = file_convert(array_files)
-file_export(tate_files)
+if params[:l]
+  p file_stat(array_files)
+else
+  file_export(tate_files)
+end
