@@ -20,23 +20,19 @@ def convert_mode(num)
 end
 
 def file_stat(array_files)
-  file_stat = []
   file_mode = []
-  array_files.each_with_index do |file, i|
-    file_stat << File.stat(file)
-    num = file_stat[i].mode
+  array_files.each_with_index do |f, i|
+    s = File.stat(f)
+    num = s.mode
     if num > 40_960 # シンボリックリンク
       num -= 40_960
-      num = num.to_s(8) # 3桁の8進数
-      file_mode << 'l' << convert_mode(num)
+      file_mode << (+'l' << convert_mode(num.to_s(8)) << ' ')
     elsif num > 32_768 # 通常ファイル
       num -= 32_768
-      num = num.to_s(8)
-      file_mode << (+'-' << convert_mode(num))
+      file_mode << (+'-' << convert_mode(num.to_s(8)) << ' ')
     elsif num > 16_384 # ディレクトリ
       num -= 16_384
-      num = num.to_s(8)
-      file_mode << (+'d' << convert_mode(num))
+      file_mode << (+'d' << convert_mode(num.to_s(8)) << ' ')
     end
   end
   file_mode
