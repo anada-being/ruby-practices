@@ -6,6 +6,7 @@ require 'optparse'
 require 'etc'
 
 MAX_ROW = 3
+BLOCK = 1024
 
 def file_import
   Dir.foreach('.').sort.to_a.filter { |file| !file.start_with?('.') }
@@ -38,6 +39,19 @@ def file_stat(array_files)
     file_mode[i].concat(s.nlink.to_s, ' ', Etc.getpwuid(s.uid).name, ' ', Etc.getgrgid(s.gid).name, ' ', s.size.to_s, ' ', s.mtime.strftime('%b %e %R'), ' ', f)
   end
   file_mode
+end
+
+def size_total(array_files)
+  sum = 0
+  array_files.each do |f|
+    s = File.stat(f).size
+    next if s.zero?
+
+    # 4096以下は４、それ以上は1024で割った商+1
+    sum += s < BLOCK * 4 + 1 ? 4 : s / BLOCK + 1
+  end
+  print 'total '
+  p sum
 end
 
 def file_convert(array_files)
@@ -74,6 +88,7 @@ array_files = params[:a] ? all_file_import : file_import
 array_files = array_files.reverse if params[:r]
 tate_files = file_convert(array_files)
 if params[:l]
+  size_total(array_files)
   puts file_stat(array_files)
 else
   file_export(tate_files)
