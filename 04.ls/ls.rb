@@ -13,11 +13,11 @@ SYMBOLIC_LINK = 40_960
 
 
 def file_import
-  Dir.foreach('.').sort.to_a.filter { |file| !file.start_with?('.') }
+  Dir.foreach('.').to_a.filter { |file| !file.start_with?('.') }.sort_by { |s| [s.downcase, s] }
 end
 
 def all_file_import
-  Dir.foreach('.').sort.to_a
+  Dir.foreach('.').to_a.sort_by { |s| [s.downcase, s] }
 end
 
 # パーミッションの文字に変換
