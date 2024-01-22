@@ -11,7 +11,6 @@ DIRECTORY = 16_384
 REGULAR_FILE = 32_768
 SYMBOLIC_LINK = 40_960
 
-
 def file_import
   Dir.foreach('.').to_a.filter { |file| !file.start_with?('.') }.sort_by { |s| [s.downcase, s] }
 end
