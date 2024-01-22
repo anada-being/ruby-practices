@@ -7,6 +7,10 @@ require 'etc'
 
 MAX_ROW = 3
 BLOCK = 1024
+DIRECTORY = 16_384
+REGULAR_FILE = 32_768
+SYMBOLIC_LINK = 40_960
+
 
 def file_import
   Dir.foreach('.').sort.to_a.filter { |file| !file.start_with?('.') }
@@ -26,17 +30,19 @@ def file_stat(array_files)
   array_files.each_with_index do |f, i|
     s = File.stat(f)
     num = s.mode
-    if num > 40_960 # シンボリックリンク
-      num -= 40_960
-      file_mode << (+'l' << convert_mode(num.to_s(8)) << ' ')
-    elsif num > 32_768 # 通常ファイル
-      num -= 32_768
-      file_mode << (+'-' << convert_mode(num.to_s(8)) << ' ')
-    elsif num > 16_384 # ディレクトリ
-      num -= 16_384
-      file_mode << (+'d' << convert_mode(num.to_s(8)) << ' ')
+    if num > SYMBOLIC_LINK
+      num -= SYMBOLIC_LINK
+      file_mode << +'l'
+    elsif num > REGULAR_FILE
+      num -= REGULAR_FILE
+      file_mode << +'-'
+    elsif num > DIRECTORY
+      num -= DIRECTORY
+      file_mode << +'d'
     end
-    file_mode[i].concat(s.nlink.to_s, ' ', Etc.getpwuid(s.uid).name, ' ', Etc.getgrgid(s.gid).name, ' ', s.size.to_s, ' ', s.mtime.strftime('%b %e %R'), ' ', f)
+    c = convert_mode(num.to_s(8))
+    u_g_name = " #{Etc.getpwuid(s.uid).name} #{Etc.getgrgid(s.gid).name} "
+    file_mode[i].concat(c, ' ', s.nlink.to_s, u_g_name, s.size.to_s, ' ', s.mtime.strftime('%b %e %R'), ' ', f)
   end
   file_mode
 end
