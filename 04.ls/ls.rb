@@ -48,16 +48,8 @@ def file_stat(array_files)
 end
 
 def size_total(array_files)
-  sum = 0
-  array_files.each do |f|
-    s = File.stat(f).size
-    next if s.zero?
-
-    # 4096以下は４、それ以上は1024で割った商+1
-    sum += s < BLOCK * 4 + 1 ? 4 : s / BLOCK + 1
-  end
-  print 'total '
-  p sum
+  sum = array_files.map { |f| File.stat(f).blocks / 2 }.sum
+  puts "total #{sum}"
 end
 
 def file_convert(array_files)
