@@ -19,29 +19,28 @@ def all_file_import
   Dir.foreach('.').to_a.sort_by { |s| [s.downcase, s] }
 end
 
-# パーミッションの文字に変換
 def convert_mode(num)
-  num.gsub(/./, '0' => '---', '1' => '--x', '2' => '-w-', '3' => '-wx', '4' => 'r--', '5' => 'r-x', '6' => 'rw-', '7' => 'rwx')
+  f_type = if num > SYMBOLIC_LINK
+             num -= SYMBOLIC_LINK
+             +'l'
+           elsif num > REGULAR_FILE
+             num -= REGULAR_FILE
+             +'-'
+           elsif num > DIRECTORY
+             num -= DIRECTORY
+             +'d'
+           end
+  permission = num.to_s(8).gsub(/./, '0' => '---', '1' => '--x', '2' => '-w-', '3' => '-wx', '4' => 'r--', '5' => 'r-x', '6' => 'rw-', '7' => 'rwx')
+  f_type.concat(permission)
 end
 
 def file_stat(array_files)
   file_mode = []
-  array_files.each_with_index do |f, i|
+  array_files.each do |f|
     s = File.stat(f)
-    num = s.mode
-    if num > SYMBOLIC_LINK
-      num -= SYMBOLIC_LINK
-      file_mode << +'l'
-    elsif num > REGULAR_FILE
-      num -= REGULAR_FILE
-      file_mode << +'-'
-    elsif num > DIRECTORY
-      num -= DIRECTORY
-      file_mode << +'d'
-    end
-    c = convert_mode(num.to_s(8))
-    u_g_name = " #{Etc.getpwuid(s.uid).name} #{Etc.getgrgid(s.gid).name} "
-    file_mode[i].concat(c, ' ', s.nlink.to_s, u_g_name, s.size.to_s, ' ', s.mtime.strftime('%b %e %R'), ' ', f)
+    c = convert_mode(s.mode)
+    u_g_name = "#{Etc.getpwuid(s.uid).name} #{Etc.getgrgid(s.gid).name}"
+    file_mode << [c, s.nlink.to_s, u_g_name, s.size.to_s, s.mtime.strftime('%b %e %R'), f].join(' ')
   end
   file_mode
 end
