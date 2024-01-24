@@ -46,7 +46,7 @@ def file_stat(array_files)
 end
 
 def size_total(array_files)
-  sum = array_files.map { |f| File.stat(f).blocks / 2 }.sum
+  sum = array_files.sum { |f| File.stat(f).blocks / 2 }
   puts "total #{sum}"
 end
 
