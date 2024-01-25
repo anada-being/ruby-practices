@@ -31,18 +31,22 @@ def convert_mode(num)
              +'d'
            end
   permission = num.to_s(8).gsub(/./, '0' => '---', '1' => '--x', '2' => '-w-', '3' => '-wx', '4' => 'r--', '5' => 'r-x', '6' => 'rw-', '7' => 'rwx')
-  f_type.concat(permission)
+  "#{f_type}""#{permission}"
 end
 
 def file_stat(array_files)
-  file_mode = []
-  array_files.each do |f|
+  array_files.map do |f|
     s = File.stat(f)
-    c = convert_mode(s.mode)
-    u_g_name = "#{Etc.getpwuid(s.uid).name} #{Etc.getgrgid(s.gid).name}"
-    file_mode << [c, s.nlink.to_s, u_g_name, s.size.to_s, s.mtime.strftime('%b %e %R'), f].join(' ')
+    [
+      convert_mode(s.mode),
+      s.nlink.to_s,
+      Etc.getpwuid(s.uid).name,
+      Etc.getgrgid(s.gid).name,
+      s.size.to_s,
+      s.mtime.strftime('%b %e %R'),
+      f
+    ].join(' ')
   end
-  file_mode
 end
 
 def size_total(array_files)
