@@ -7,51 +7,51 @@ require 'etc'
 
 MAX_ROW = 3
 BLOCK = 1024
+DIRECTORY = 16_384
+REGULAR_FILE = 32_768
+SYMBOLIC_LINK = 40_960
 
 def file_import
-  Dir.foreach('.').sort.to_a.filter { |file| !file.start_with?('.') }
+  Dir.foreach('.').to_a.filter { |file| !file.start_with?('.') }.sort_by { |s| [s.downcase, s] }
 end
 
 def all_file_import
-  Dir.foreach('.').sort.to_a
+  Dir.foreach('.').to_a.sort_by { |s| [s.downcase, s] }
 end
 
-# パーミッションの文字に変換
 def convert_mode(num)
-  num.gsub(/./, '0' => '---', '1' => '--x', '2' => '-w-', '3' => '-wx', '4' => 'r--', '5' => 'r-x', '6' => 'rw-', '7' => 'rwx')
+  f_type = if num > SYMBOLIC_LINK
+             num -= SYMBOLIC_LINK
+             +'l'
+           elsif num > REGULAR_FILE
+             num -= REGULAR_FILE
+             +'-'
+           elsif num > DIRECTORY
+             num -= DIRECTORY
+             +'d'
+           end
+  permission = num.to_s(8).gsub(/./, '0' => '---', '1' => '--x', '2' => '-w-', '3' => '-wx', '4' => 'r--', '5' => 'r-x', '6' => 'rw-', '7' => 'rwx')
+  "#{f_type}""#{permission}"
 end
 
 def file_stat(array_files)
-  file_mode = []
-  array_files.each_with_index do |f, i|
+  array_files.map do |f|
     s = File.stat(f)
-    num = s.mode
-    if num > 40_960 # シンボリックリンク
-      num -= 40_960
-      file_mode << (+'l' << convert_mode(num.to_s(8)) << ' ')
-    elsif num > 32_768 # 通常ファイル
-      num -= 32_768
-      file_mode << (+'-' << convert_mode(num.to_s(8)) << ' ')
-    elsif num > 16_384 # ディレクトリ
-      num -= 16_384
-      file_mode << (+'d' << convert_mode(num.to_s(8)) << ' ')
-    end
-    file_mode[i].concat(s.nlink.to_s, ' ', Etc.getpwuid(s.uid).name, ' ', Etc.getgrgid(s.gid).name, ' ', s.size.to_s, ' ', s.mtime.strftime('%b %e %R'), ' ', f)
+    [
+      convert_mode(s.mode),
+      s.nlink.to_s,
+      Etc.getpwuid(s.uid).name,
+      Etc.getgrgid(s.gid).name,
+      s.size.to_s,
+      s.mtime.strftime('%b %e %R'),
+      f
+    ].join(' ')
   end
-  file_mode
 end
 
 def size_total(array_files)
-  sum = 0
-  array_files.each do |f|
-    s = File.stat(f).size
-    next if s.zero?
-
-    # 4096以下は４、それ以上は1024で割った商+1
-    sum += s < BLOCK * 4 + 1 ? 4 : s / BLOCK + 1
-  end
-  print 'total '
-  p sum
+  sum = array_files.sum { |f| File.stat(f).blocks / 2 }
+  puts "total #{sum}"
 end
 
 def file_convert(array_files)
