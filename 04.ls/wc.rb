@@ -28,9 +28,8 @@ def bytes_count(files)
   end
 end
 
-def output(*arr)
+def file_output(*arr)
   directory_exist = false
-  arr.compact!
   totals = [0, 0, 0]
   ARGV.each_with_index do |f, i|
     if FileTest.directory?(f)
@@ -52,7 +51,18 @@ def output(*arr)
   puts 'total'
 end
 
+def standerd_template
+  input = readlines
+  return_value = []
+  return_value << input.join.count("\n", "/[^\n]\z/")
+  return_value << input.join(' ').split.size
+  return_value << input.join.bytesize
+  return_value
+end
 
+def standerd_output(standerd_template)
+  standerd_template.each do |input_data|
+    printf('%8s', "#{input_data} ")
   end
   puts "\n"
 end
@@ -84,4 +94,5 @@ unless bool_arr.none?
   end
 end
 
-output(*arr)
+arr.compact!
+ARGV.empty? ? standerd_output(standerd_template) : file_output(*arr)
