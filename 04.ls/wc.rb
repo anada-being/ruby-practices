@@ -4,6 +4,18 @@
 
 require 'optparse'
 
+params = { l: false, w: false, c: false }
+
+def define_option_boolean(params)
+  opt = OptionParser.new
+
+  opt.on('-l') { |v| params[:l] = v }
+  opt.on('-w') { |v| params[:w] = v }
+  opt.on('-c') { |v| params[:c] = v }
+  opt.parse!(ARGV)
+  params
+end
+
 def main
   inputs = ARGV.empty? ? readlines : ARGV
   count_result = {
@@ -20,7 +32,7 @@ def main
   end
   trimmed_data = trim_data(count_result)
 
-  ARGV.empty? ? output_standard(trimmed_data) : output_file(*trimmed_data)
+  ARGV.empty? ? output_standard(trimmed_data) : output_file(**trimmed_data)
 end
 
 def count_lines(inputs)
@@ -60,21 +72,12 @@ def count_bytes(inputs)
 end
 
 def trim_data(count_result)
-  opt_bool = define_option_boolean
-  count_result.delete(:lines) if opt_bool[:l]
-  count_result.delete(:words) if opt_bool[:w]
-  count_result.delete(:bytes) if opt_bool[:c]
+  if @params.value?(true)
+    count_result.delete(:lines) unless @params[:l]
+    count_result.delete(:words) unless @params[:w]
+    count_result.delete(:bytes) unless @params[:c]
+  end
   count_result
-end
-
-def define_option_boolean
-  opt = OptionParser.new
-  params = { l: false, w: false, c: false }
-  opt.on('-l') { |v| params[:l] = v }
-  opt.on('-w') { |v| params[:w] = v }
-  opt.on('-c') { |v| params[:c] = v }
-  opt.parse!(ARGV)
-  { l: params[:l], w: params[:w], c: params[:c] }
 end
 
 def output_standard(count_result)
@@ -84,21 +87,20 @@ def output_standard(count_result)
   puts "\n"
 end
 
-def output_file(*count_result)
+def output_file(**count_result)
   directory_exist = false
-  totals = { lines: 0, words: 0, bytes: 0 }
   ARGV.each_with_index do |f, i|
     if FileTest.directory?(f)
       puts "wc: #{f}: Is a directory"
       directory_exist = true
     end
-    count_result.each do |key, val|
+    count_result.each_value do |val|
       directory_exist ? printf('%8s', "#{val[i]} ") : printf('%5s', "#{val[i]} ")
-      totals[key] += val[i]
     end
     puts f
   end
-  totals.each_value do |v|
+  totals = calculate_total(count_result)
+  totals.each do |v|
     next if v.zero?
 
     directory_exist ? printf('%8s', "#{v} ") : printf('%5s', "#{v} ")
@@ -106,4 +108,9 @@ def output_file(*count_result)
   puts 'total'
 end
 
+def calculate_total(count_result)
+  count_result.map { |_key, val| val.sum }
+end
+
+@params = define_option_boolean(params)
 main
