@@ -7,9 +7,9 @@ require 'optparse'
 def main
   inputs = ARGV.empty? ? readlines : ARGV
   count_result = {
-    lines: line_count(inputs),
-    words: word_count(inputs),
-    bytes: bytes_count(inputs)
+    lines: count_lines(inputs),
+    words: count_words(inputs),
+    bytes: count_bytes(inputs)
   }
   count_result.map do |_key, val|
     next if val.instance_of?(Integer)
@@ -20,10 +20,10 @@ def main
   end
   trimmed_data = trim_data(count_result)
 
-  ARGV.empty? ? standerd_output(trimmed_data) : file_output(*trimmed_data)
+  ARGV.empty? ? output_standard(trimmed_data) : output_file(*trimmed_data)
 end
 
-def line_count(inputs)
+def count_lines(inputs)
   if FileTest.readable?(inputs[0])
     inputs.map do |f|
       next if FileTest.directory?(f)
@@ -35,7 +35,7 @@ def line_count(inputs)
   end
 end
 
-def word_count(inputs)
+def count_words(inputs)
   if FileTest.readable?(inputs[0])
     inputs.map do |f|
       next if FileTest.directory?(f)
@@ -47,7 +47,7 @@ def word_count(inputs)
   end
 end
 
-def bytes_count(inputs)
+def count_bytes(inputs)
   if FileTest.readable?(inputs[0])
     inputs.map do |f|
       next if FileTest.directory?(f)
@@ -77,14 +77,14 @@ def define_option_boolean
   { l: params[:l], w: params[:w], c: params[:c] }
 end
 
-def standerd_output(count_result)
+def output_standard(count_result)
   count_result.each_value do |val|
     printf('%8s', "#{val} ")
   end
   puts "\n"
 end
 
-def file_output(*count_result)
+def output_file(*count_result)
   directory_exist = false
   totals = { lines: 0, words: 0, bytes: 0 }
   ARGV.each_with_index do |f, i|
