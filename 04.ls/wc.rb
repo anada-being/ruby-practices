@@ -4,95 +4,106 @@
 
 require 'optparse'
 
-def line_count(files)
-  files.map do |f|
-    next if FileTest.directory?(f)
+def main
+  inputs = ARGV.empty? ? readlines : ARGV
+  count_result = {
+    lines: line_count(inputs),
+    words: word_count(inputs),
+    bytes: bytes_count(inputs)
+  }
+  count_result.map do |_key, val|
+    next if val.instance_of?(Integer)
 
-    File.read(f).count("\n", "/[^\n]\z/")
-  end
-end
-
-def word_count(files)
-  files.map do |f|
-    next if FileTest.directory?(f)
-
-    File.read(f).split.size
-  end
-end
-
-def bytes_count(files)
-  files.map do |f|
-    next if FileTest.directory?(f)
-
-    File.stat(f).size
-  end
-end
-
-def file_output(*arr)
-  directory_exist = false
-  totals = [0, 0, 0]
-  ARGV.each_with_index do |f, i|
-    if FileTest.directory?(f)
-      puts "wc: #{f}: Is a directory"
-      arr.size.times { printf('%8s', '0 ') }
-      directory_exist = true
-    else
-      arr.each_with_index do |data, num|
-        directory_exist ? printf('%8s', "#{data[i]} ") : printf('%5s', "#{data[i]} ")
-        totals[num] += data[i]
-      end
+    val.each_with_index do |v, i|
+      val[i] = 0 if v.nil?
     end
-    puts f
   end
-  totals.delete(0)
-  totals.each do |total|
-    directory_exist ? printf('%8s', "#{total} ") : printf('%5s', "#{total} ")
-  end
-  puts 'total'
+  trimmed_data = trim_data(count_result)
+
+  ARGV.empty? ? standerd_output(trimmed_data) : file_output(*trimmed_data)
 end
 
-def standerd_template
-  input = readlines
-  return_value = []
-  return_value << input.join.count("\n", "/[^\n]\z/")
-  return_value << input.join(' ').split.size
-  return_value << input.join.bytesize
-  return_value
-end
+def line_count(inputs)
+  if FileTest.readable?(inputs[0])
+    inputs.map do |f|
+      next if FileTest.directory?(f)
 
-def standerd_output(standerd_template)
-  standerd_template.each do |input_data|
-    printf('%8s', "#{input_data} ")
+      File.read(f).count("\n", "/[^\n]\z/")
+    end
+  else
+    inputs.join.count("\n", "/[^\n]\z/")
   end
-  puts "\n"
 end
 
-def opt_params
+def word_count(inputs)
+  if FileTest.readable?(inputs[0])
+    inputs.map do |f|
+      next if FileTest.directory?(f)
+
+      File.read(f).split.size
+    end
+  else
+    inputs.join(' ').split.size
+  end
+end
+
+def bytes_count(inputs)
+  if FileTest.readable?(inputs[0])
+    inputs.map do |f|
+      next if FileTest.directory?(f)
+
+      File.stat(f).size
+    end
+  else
+    inputs.join.bytesize
+  end
+end
+
+def trim_data(count_result)
+  opt_bool = define_option_boolean
+  count_result.delete(:lines) if opt_bool[:l]
+  count_result.delete(:words) if opt_bool[:w]
+  count_result.delete(:bytes) if opt_bool[:c]
+  count_result
+end
+
+def define_option_boolean
   opt = OptionParser.new
-  params = { 'l': false, 'w': false, 'c': false }
+  params = { l: false, w: false, c: false }
   opt.on('-l') { |v| params[:l] = v }
   opt.on('-w') { |v| params[:w] = v }
   opt.on('-c') { |v| params[:c] = v }
   opt.parse!(ARGV)
-  option = %i[l w c]
-  bool_arr = option.map { |b| params[b] }
-  lines = line_count(ARGV)
-  words = word_count(ARGV)
-  bytes = bytes_count(ARGV)
-  arr = [lines, words, bytes]
-  [bool_arr, arr]
+  { l: params[:l], w: params[:w], c: params[:c] }
 end
 
-bool_arr = opt_params[0]
-arr = opt_params[1]
-
-unless bool_arr.none?
-  bool_arr.each_with_index do |b, i|
-    next if b
-
-    arr[i] = nil
+def standerd_output(count_result)
+  count_result.each_value do |val|
+    printf('%8s', "#{val} ")
   end
+  puts "\n"
 end
 
-arr.compact!
-ARGV.empty? ? standerd_output(standerd_template) : file_output(*arr)
+def file_output(*count_result)
+  directory_exist = false
+  totals = { lines: 0, words: 0, bytes: 0 }
+  ARGV.each_with_index do |f, i|
+    if FileTest.directory?(f)
+      puts "wc: #{f}: Is a directory"
+      directory_exist = true
+    end
+    count_result.each do |key, val|
+      directory_exist ? printf('%8s', "#{val[i]} ") : printf('%5s', "#{val[i]} ")
+      totals[key] += val[i]
+    end
+    puts f
+  end
+  totals.each_value do |v|
+    next if v.zero?
+
+    directory_exist ? printf('%8s', "#{v} ") : printf('%5s', "#{v} ")
+  end
+  puts 'total'
+end
+
+main
