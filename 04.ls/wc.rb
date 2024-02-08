@@ -4,16 +4,16 @@
 
 require 'optparse'
 
-params = { l: false, w: false, c: false }
+opt_params = { l: false, w: false, c: false }
 
-def define_option_boolean(params)
+def define_option_boolean(opt_params)
   opt = OptionParser.new
 
-  opt.on('-l') { |v| params[:l] = v }
-  opt.on('-w') { |v| params[:w] = v }
-  opt.on('-c') { |v| params[:c] = v }
+  opt.on('-l') { |v| opt_params[:l] = v }
+  opt.on('-w') { |v| opt_params[:w] = v }
+  opt.on('-c') { |v| opt_params[:c] = v }
   opt.parse!(ARGV)
-  params
+  opt_params
 end
 
 def main
@@ -72,10 +72,10 @@ def count_bytes(inputs)
 end
 
 def trim_data(count_result)
-  if @params.value?(true)
-    count_result.delete(:lines) unless @params[:l]
-    count_result.delete(:words) unless @params[:w]
-    count_result.delete(:bytes) unless @params[:c]
+  if @opt_params.value?(true)
+    count_result.delete(:lines) unless @opt_params[:l]
+    count_result.delete(:words) unless @opt_params[:w]
+    count_result.delete(:bytes) unless @opt_params[:c]
   end
   count_result
 end
@@ -112,5 +112,5 @@ def calculate_total(count_result)
   count_result.map { |_key, val| val.sum }
 end
 
-@params = define_option_boolean(params)
+@opt_params = define_option_boolean(opt_params)
 main
