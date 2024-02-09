@@ -24,38 +24,46 @@ def main
     bytes: count_bytes(inputs)
   }
   count_result.map do |_key, val|
-    next if val.instance_of?(Integer)
-
     val.each_with_index do |v, i|
       val[i] = 0 if v.nil?
     end
   end
   trimmed_data = trim_data(count_result)
 
-  ARGV.empty? ? output_standard(trimmed_data) : output_file(**trimmed_data)
+  ARGV.empty? ? output_standard(**trimmed_data) : output_file(**trimmed_data)
 end
 
 def count_lines(inputs)
-  if FileTest.readable?(inputs[0])
-    inputs.map do |f|
-      next if FileTest.directory?(f)
+  inputs = if FileTest.readable?(inputs[0])
+            inputs.map do |f|
+              next if FileTest.directory?(f)
 
-      File.read(f).count("\n", "/[^\n]\z/")
-    end
-  else
-    inputs.join.count("\n", "/[^\n]\z/")
+              File.read(f)
+            end
+          else
+            [ inputs.join ]
+          end
+  inputs.map do |string|
+    next if string.nil?
+
+    string.count("\n", "/[^\n]\z/")
   end
 end
 
 def count_words(inputs)
-  if FileTest.readable?(inputs[0])
-    inputs.map do |f|
-      next if FileTest.directory?(f)
+  inputs = if FileTest.readable?(inputs[0])
+              inputs.map do |f|
+                next if FileTest.directory?(f)
 
-      File.read(f).split.size
-    end
-  else
-    inputs.join(' ').split.size
+                File.read(f)
+              end
+            else
+              [ inputs.join(' ') ]
+            end
+  inputs.map do |string|
+    next if string.nil?
+
+    string.split.size
   end
 end
 
@@ -67,7 +75,7 @@ def count_bytes(inputs)
       File.stat(f).size
     end
   else
-    inputs.join.bytesize
+    [ inputs.join.bytesize ]
   end
 end
 
@@ -80,9 +88,9 @@ def trim_data(count_result)
   count_result
 end
 
-def output_standard(count_result)
+def output_standard(**count_result)
   count_result.each_value do |val|
-    printf('%8s', "#{val} ")
+    val.each { |v| printf('%8s', "#{v} ") }
   end
   puts "\n"
 end
