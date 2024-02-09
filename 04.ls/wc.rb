@@ -4,9 +4,9 @@
 
 require 'optparse'
 
-opt_params = { l: false, w: false, c: false }
-
-def define_option_boolean(opt_params)
+# 一度だけ実行し、@opt_paramsはこれ以降変更しない
+def define_option_boolean
+  opt_params = { l: false, w: false, c: false }
   opt = OptionParser.new
 
   opt.on('-l') { |v| opt_params[:l] = v }
@@ -112,5 +112,5 @@ def calculate_total(count_result)
   count_result.map { |_key, val| val.sum }
 end
 
-@opt_params = define_option_boolean(opt_params)
+@opt_params = define_option_boolean
 main
