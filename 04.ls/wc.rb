@@ -4,7 +4,22 @@
 
 require 'optparse'
 
-# 一度だけ実行し、@opt_paramsはこれ以降変更しない
+def main
+  argv = define_option_boolean[1]
+  if argv.empty?
+    inputs = $stdin.readlines
+    formatted_inputs = inputs.join
+    count = { line: 0, word: 0, byte: 0 }
+    count[:line] = count_lines(formatted_inputs)
+    count[:word] = count_words(formatted_inputs)
+    count[:byte] = formatted_inputs.size
+    formatted_lwc = format_lwc(**count)
+    output_standard(formatted_lwc)
+  else
+    output_file(make_lwc)
+  end
+end
+
 def define_option_boolean
   opt_params = { l: false, w: false, c: false }
   opt = OptionParser.new
@@ -12,113 +27,81 @@ def define_option_boolean
   opt.on('-l') { |v| opt_params[:l] = v }
   opt.on('-w') { |v| opt_params[:w] = v }
   opt.on('-c') { |v| opt_params[:c] = v }
-  opt.parse!(ARGV)
-  opt_params
+  argv = opt.parse(ARGV)
+  [opt_params, argv]
 end
 
-def main
-  inputs = ARGV.empty? ? readlines : ARGV
-  count_result = {
-    lines: count_lines(inputs),
-    words: count_words(inputs),
-    bytes: count_bytes(inputs)
-  }
-  count_result.map do |_key, val|
-    val.each_with_index do |v, i|
-      val[i] = 0 if v.nil?
+def make_lwc
+  argv = define_option_boolean[1]
+  lwc_data = []
+  argv.each do |file_name|
+    lwc = { line: 0, word: 0, byte: 0, name: '' }
+    if FileTest.file?(file_name)
+      file_data = File.read(file_name)
+      lwc[:line] = count_lines(file_data)
+      lwc[:word] = count_words(file_data)
+      lwc[:byte] = File.stat(file_name).size
     end
+    lwc[:name] = file_name
+    lwc_data << format_lwc(**lwc)
   end
-  trimmed_data = trim_data(count_result)
-
-  ARGV.empty? ? output_standard(**trimmed_data) : output_file(**trimmed_data)
+  lwc_data
 end
 
-def count_lines(inputs)
-  inputs = if FileTest.readable?(inputs[0])
-            inputs.map do |f|
-              next if FileTest.directory?(f)
-
-              File.read(f)
-            end
-          else
-            [ inputs.join ]
-          end
-  inputs.map do |string|
-    next if string.nil?
-
-    string.count("\n", "/[^\n]\z/")
-  end
+def count_lines(strings)
+  strings.count("\n", "/[^\n]\z/")
 end
 
-def count_words(inputs)
-  inputs = if FileTest.readable?(inputs[0])
-              inputs.map do |f|
-                next if FileTest.directory?(f)
-
-                File.read(f)
-              end
-            else
-              [ inputs.join(' ') ]
-            end
-  inputs.map do |string|
-    next if string.nil?
-
-    string.split.size
-  end
+def count_words(strings)
+  strings.split.size
 end
 
-def count_bytes(inputs)
-  if FileTest.readable?(inputs[0])
-    inputs.map do |f|
-      next if FileTest.directory?(f)
-
-      File.stat(f).size
-    end
-  else
-    [ inputs.join.bytesize ]
+def format_lwc(**lwc)
+  opt_params = define_option_boolean[0]
+  if opt_params.value?(true)
+    lwc.delete(:line) unless opt_params[:l]
+    lwc.delete(:word) unless opt_params[:w]
+    lwc.delete(:byte) unless opt_params[:c]
   end
+  lwc
 end
 
-def trim_data(count_result)
-  if @opt_params.value?(true)
-    count_result.delete(:lines) unless @opt_params[:l]
-    count_result.delete(:words) unless @opt_params[:w]
-    count_result.delete(:bytes) unless @opt_params[:c]
-  end
-  count_result
-end
-
-def output_standard(**count_result)
+def output_standard(count_result)
   count_result.each_value do |val|
-    val.each { |v| printf('%8s', "#{v} ") }
+    printf('%8s', "#{val} ")
   end
   puts "\n"
 end
 
-def output_file(**count_result)
-  directory_exist = false
-  ARGV.each_with_index do |f, i|
-    if FileTest.directory?(f)
-      puts "wc: #{f}: Is a directory"
-      directory_exist = true
+def output_file(lwc_data)
+  directory_exist = 5
+  lwc_data.each do |lwc|
+    if lwc.value?(0)
+      puts "wc: #{lwc[:name]}: Is a directory"
+      directory_exist = 8
     end
-    count_result.each_value do |val|
-      directory_exist ? printf('%8s', "#{val[i]} ") : printf('%5s', "#{val[i]} ")
+    lwc.each_value do |v|
+      if v.is_a?(Integer)
+        printf("%#{directory_exist}s", "#{v} ")
+      else
+        puts v
+      end
     end
-    puts f
   end
-  totals = calculate_total(count_result)
-  totals.each do |v|
-    next if v.zero?
-
-    directory_exist ? printf('%8s', "#{v} ") : printf('%5s', "#{v} ")
-  end
+  totals = calculate_total(lwc_data)
+  totals.each_value { |v| printf("%#{directory_exist}s", "#{v} ") }
   puts 'total'
 end
 
-def calculate_total(count_result)
-  count_result.map { |_key, val| val.sum }
+def calculate_total(lwc_data)
+  totals = { line: 0, word: 0, byte: 0 }
+  lwc_data.each do |lwc|
+    totals[:line] += lwc[:line] unless lwc[:line].nil?
+    totals[:word] += lwc[:word] unless lwc[:word].nil?
+    totals[:byte] += lwc[:byte] unless lwc[:byte].nil?
+  end
+  format_lwc(**totals)
+  totals
 end
 
-@opt_params = define_option_boolean
 main
