@@ -5,22 +5,19 @@
 require 'optparse'
 
 def main
-  argv = define_option_boolean[1]
+  cmd_arg = receive_command_argument
+  opt_params = cmd_arg[0]
+  argv = cmd_arg[1]
   if argv.empty?
-    inputs = $stdin.readlines
-    formatted_inputs = inputs.join
-    count = { line: 0, word: 0, byte: 0 }
-    count[:line] = count_lines(formatted_inputs)
-    count[:word] = count_words(formatted_inputs)
-    count[:byte] = formatted_inputs.size
-    formatted_lwc = format_lwc(**count)
-    output_standard(formatted_lwc)
+    std_data = make_std
+    output(std_data, opt_params)
   else
-    output_file(make_lwc)
+    lwc_data = make_lwc(argv)
+    output(lwc_data, opt_params)
   end
 end
 
-def define_option_boolean
+def receive_command_argument
   opt_params = { l: false, w: false, c: false }
   opt = OptionParser.new
 
@@ -31,76 +28,71 @@ def define_option_boolean
   [opt_params, argv]
 end
 
-def make_lwc
-  argv = define_option_boolean[1]
-  lwc_data = []
-  argv.each do |file_name|
-    lwc = { line: 0, word: 0, byte: 0, name: '' }
+def make_std
+  inputs = $stdin.readlines
+  formatted_inputs = inputs.join
+  count = { line: 0, word: 0, byte: 0, new_line: ' ' }
+  count[:line] = count_lines(formatted_inputs)
+  count[:word] = count_words(formatted_inputs)
+  count[:byte] = formatted_inputs.size
+  [count]
+end
+
+def make_lwc(argv)
+  argv.map do |file_name|
+    lwc = { line: 0, word: 0, byte: 0, name: '', directory: false }
     if FileTest.file?(file_name)
       file_data = File.read(file_name)
       lwc[:line] = count_lines(file_data)
       lwc[:word] = count_words(file_data)
-      lwc[:byte] = File.stat(file_name).size
+      lwc[:byte] = file_data.size
     end
     lwc[:name] = file_name
-    lwc_data << format_lwc(**lwc)
+    lwc[:directory] = true if FileTest.directory?(file_name)
+    lwc
   end
-  lwc_data
 end
 
-def count_lines(strings)
-  strings.count("\n", "/[^\n]\z/")
+def count_lines(text)
+  text.lines.size
 end
 
-def count_words(strings)
-  strings.split.size
+def count_words(text)
+  text.split.size
 end
 
-def format_lwc(**lwc)
-  opt_params = define_option_boolean[0]
-  if opt_params.value?(true)
-    lwc.delete(:line) unless opt_params[:l]
-    lwc.delete(:word) unless opt_params[:w]
-    lwc.delete(:byte) unless opt_params[:c]
-  end
-  lwc
-end
-
-def output_standard(count_result)
-  count_result.each_value do |val|
-    printf('%8s', "#{val} ")
-  end
-  puts "\n"
-end
-
-def output_file(lwc_data)
-  directory_exist = 5
+def output(lwc_data, opt_params)
   lwc_data.each do |lwc|
-    if lwc.value?(0)
-      puts "wc: #{lwc[:name]}: Is a directory"
-      directory_exist = 8
-    end
+    puts "wc: #{lwc[:name]}: Is a directory" if lwc[:directory]
+    output_detail(lwc, opt_params)
+  end
+  return if lwc_data.size == 1
+
+  totals = calculate_total(lwc_data)
+  totals.each_value { |v| print "#{v} ".rjust(8) }
+  puts 'total'
+end
+
+def output_detail(lwc, opt_params)
+  if opt_params.value?(true)
+    print "#{lwc[:line]} ".rjust(8) unless opt_params[:l]
+    print "#{lwc[:word]} ".rjust(8) unless opt_params[:w]
+    print "#{lwc[:byte]} ".rjust(8) unless opt_params[:c]
+  else
     lwc.each_value do |v|
-      if v.is_a?(Integer)
-        printf("%#{directory_exist}s", "#{v} ")
-      else
-        puts v
-      end
+      print "#{v} ".rjust(8) if v.is_a?(Integer)
     end
   end
-  totals = calculate_total(lwc_data)
-  totals.each_value { |v| printf("%#{directory_exist}s", "#{v} ") }
-  puts 'total'
+  puts lwc[:name]
 end
 
 def calculate_total(lwc_data)
   totals = { line: 0, word: 0, byte: 0 }
   lwc_data.each do |lwc|
-    totals[:line] += lwc[:line] unless lwc[:line].nil?
-    totals[:word] += lwc[:word] unless lwc[:word].nil?
-    totals[:byte] += lwc[:byte] unless lwc[:byte].nil?
+    totals[:line] += lwc[:line]
+    totals[:word] += lwc[:word]
+    totals[:byte] += lwc[:byte]
   end
-  format_lwc(**totals)
   totals
 end
 
