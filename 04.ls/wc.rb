@@ -62,25 +62,28 @@ def count_words(text)
 end
 
 def output(lwc_data, opt_params)
+  boolen = lwc_data.all? { |hash| hash[:directory] == false }
+  number = 8
+  number = 5 if boolen
   lwc_data.each do |lwc|
     puts "wc: #{lwc[:name]}: Is a directory" if lwc[:directory]
-    output_detail(lwc, opt_params)
+    output_detail(lwc, opt_params, number)
   end
   return if lwc_data.size == 1
 
   totals = calculate_total(lwc_data)
-  totals.each_value { |v| print "#{v} ".rjust(8) }
+  totals.each_value { |v| print "#{v} ".rjust(number) }
   puts 'total'
 end
 
-def output_detail(lwc, opt_params)
+def output_detail(lwc, opt_params, number)
   if opt_params.value?(true)
-    print "#{lwc[:line]} ".rjust(8) unless opt_params[:l]
-    print "#{lwc[:word]} ".rjust(8) unless opt_params[:w]
-    print "#{lwc[:byte]} ".rjust(8) unless opt_params[:c]
+    print "#{lwc[:line]} ".rjust(number) unless opt_params[:l]
+    print "#{lwc[:word]} ".rjust(number) unless opt_params[:w]
+    print "#{lwc[:byte]} ".rjust(number) unless opt_params[:c]
   else
     lwc.each_value do |v|
-      print "#{v} ".rjust(8) if v.is_a?(Integer)
+      print "#{v} ".rjust(number) if v.is_a?(Integer)
     end
   end
   puts lwc[:name]
