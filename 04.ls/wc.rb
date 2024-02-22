@@ -5,15 +5,11 @@
 require 'optparse'
 
 def main
-  cmd_arg = receive_command_argument
-  opt_params = cmd_arg[0]
-  argv = cmd_arg[1]
-  if argv.empty?
-    std_data = make_std
-    output(std_data, opt_params)
+  options, paths = receive_command_argument
+  if paths.empty?
+    output(count_stdin, options)
   else
-    lwc_data = make_lwc(argv)
-    output(lwc_data, opt_params)
+    output(count_file(paths), options)
   end
 end
 
@@ -28,28 +24,28 @@ def receive_command_argument
   [opt_params, argv]
 end
 
-def make_std
-  inputs = $stdin.readlines
-  formatted_inputs = inputs.join
-  count = { line: 0, word: 0, byte: 0, new_line: ' ' }
-  count[:line] = count_lines(formatted_inputs)
-  count[:word] = count_words(formatted_inputs)
-  count[:byte] = formatted_inputs.size
+def count_stdin
+  inputs = $stdin.readlines.join
+  count = {
+    line: count_lines(inputs),
+    word: count_words(inputs),
+    byte: inputs.size
+  }
   [count]
 end
 
-def make_lwc(argv)
-  argv.map do |file_name|
-    lwc = { line: 0, word: 0, byte: 0, name: '', directory: false }
+def count_file(paths)
+  paths.map do |file_name|
+    property = { line: 0, word: 0, byte: 0, name: '', directory: false }
     if FileTest.file?(file_name)
       file_data = File.read(file_name)
-      lwc[:line] = count_lines(file_data)
-      lwc[:word] = count_words(file_data)
-      lwc[:byte] = file_data.size
+      property[:line] = count_lines(file_data)
+      property[:word] = count_words(file_data)
+      property[:byte] = file_data.size
     end
-    lwc[:name] = file_name
-    lwc[:directory] = true if FileTest.directory?(file_name)
-    lwc
+    property[:name] = file_name
+    property[:directory] = FileTest.directory?(file_name)
+    property
   end
 end
 
@@ -61,40 +57,35 @@ def count_words(text)
   text.split.size
 end
 
-def output(lwc_data, opt_params)
-  boolen = lwc_data.all? { |hash| hash[:directory] == false }
-  number = 8
-  number = 5 if boolen
-  lwc_data.each do |lwc|
-    puts "wc: #{lwc[:name]}: Is a directory" if lwc[:directory]
-    output_detail(lwc, opt_params, number)
+def output(file_properties, options)
+  only_files = file_properties.none? { |hash| hash[:directory] == true }
+  only_files = file_properties[0].key?(:directory) if only_files
+  padding_right = only_files ? 5 : 8
+  file_properties.each do |property|
+    puts "wc: #{property[:name]}: Is a directory" if property[:directory]
+    output_by_options(property, options, padding_right)
+    puts property[:name]
   end
-  return if lwc_data.size == 1
+  return if file_properties.size == 1
 
-  totals = calculate_total(lwc_data)
-  totals.each_value { |v| print "#{v} ".rjust(number) }
+  totals = calculate_total(file_properties)
+  output_by_options(totals, options, padding_right)
   puts 'total'
 end
 
-def output_detail(lwc, opt_params, number)
-  if opt_params.value?(true)
-    print "#{lwc[:line]} ".rjust(number) unless opt_params[:l]
-    print "#{lwc[:word]} ".rjust(number) unless opt_params[:w]
-    print "#{lwc[:byte]} ".rjust(number) unless opt_params[:c]
-  else
-    lwc.each_value do |v|
-      print "#{v} ".rjust(number) if v.is_a?(Integer)
-    end
-  end
-  puts lwc[:name]
+def output_by_options(hash, options, padding_right)
+  options = options.transform_values(&:!) unless options.value?(true)
+  print "#{hash[:line]} ".rjust(padding_right) if options[:l]
+  print "#{hash[:word]} ".rjust(padding_right) if options[:w]
+  print "#{hash[:byte]} ".rjust(padding_right) if options[:c]
 end
 
-def calculate_total(lwc_data)
+def calculate_total(counts)
   totals = { line: 0, word: 0, byte: 0 }
-  lwc_data.each do |lwc|
-    totals[:line] += lwc[:line]
-    totals[:word] += lwc[:word]
-    totals[:byte] += lwc[:byte]
+  counts.each do |property|
+    totals[:line] += property[:line]
+    totals[:word] += property[:word]
+    totals[:byte] += property[:byte]
   end
   totals
 end
