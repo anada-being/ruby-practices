@@ -54,30 +54,29 @@ def count_words(text)
 end
 
 def output(file_properties, options)
-  only_files = file_properties.none? { |hash| hash[:directory] == true }
+  only_files = file_properties.none? { |property| property[:directory] == true }
   only_files = file_properties[0].key?(:directory) if only_files
   padding_right = only_files ? 5 : 8
   file_properties.each do |property|
     puts "wc: #{property[:name]}: Is a directory" if property[:directory]
     output_by_options(property, options, padding_right)
-    puts property[:name]
   end
   return if file_properties.size == 1
 
   totals = calculate_total(file_properties)
   output_by_options(totals, options, padding_right)
-  puts 'total'
 end
 
-def output_by_options(hash, options, padding_right)
+def output_by_options(property, options, padding_right)
   options = options.transform_values(&:!) unless options.value?(true)
-  print "#{hash[:line]} ".rjust(padding_right) if options[:l]
-  print "#{hash[:word]} ".rjust(padding_right) if options[:w]
-  print "#{hash[:byte]} ".rjust(padding_right) if options[:c]
+  print "#{property[:line]} ".rjust(padding_right) if options[:l]
+  print "#{property[:word]} ".rjust(padding_right) if options[:w]
+  print "#{property[:byte]} ".rjust(padding_right) if options[:c]
+  puts property[:name]
 end
 
 def calculate_total(counts)
-  totals = { line: 0, word: 0, byte: 0 }
+  totals = { line: 0, word: 0, byte: 0, name: 'total' }
   counts.each do |property|
     totals[:line] += property[:line]
     totals[:word] += property[:word]
