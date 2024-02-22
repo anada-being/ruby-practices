@@ -6,11 +6,7 @@ require 'optparse'
 
 def main
   options, paths = receive_command_argument
-  if paths.empty?
-    output(count_stdin, options)
-  else
-    output(count_file(paths), options)
-  end
+  paths.empty? ? output(count_stdin, options) : output(count_file(paths), options)
 end
 
 def receive_command_argument
