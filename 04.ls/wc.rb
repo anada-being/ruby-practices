@@ -54,9 +54,9 @@ def count_words(text)
 end
 
 def output(file_properties, options)
-  only_files = file_properties.none? { |property| property[:directory] == true }
-  only_files = file_properties[0].key?(:directory) if only_files
-  padding_left = only_files ? 5 : 8
+  is_only_files = file_properties.none? { |property| property[:directory] == true }
+  is_only_files = file_properties[0].key?(:directory) if is_only_files
+  padding_left = is_only_files ? 5 : 8
   file_properties.each do |property|
     puts "wc: #{property[:name]}: Is a directory" if property[:directory]
     output_by_options(property, options, padding_left)
