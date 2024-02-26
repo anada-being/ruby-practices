@@ -34,10 +34,10 @@ def count_file(paths)
   paths.map do |file_name|
     property = { line: 0, word: 0, byte: 0, name: '', directory: false }
     if FileTest.file?(file_name)
-      file_data = File.read(file_name)
-      property[:line] = count_lines(file_data)
-      property[:word] = count_words(file_data)
-      property[:byte] = file_data.size
+      file_texts = File.read(file_name)
+      property[:line] = count_lines(file_texts)
+      property[:word] = count_words(file_texts)
+      property[:byte] = file_texts.size
     end
     property[:name] = file_name
     property[:directory] = FileTest.directory?(file_name)
