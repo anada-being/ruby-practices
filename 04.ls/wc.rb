@@ -6,7 +6,7 @@ require 'optparse'
 
 def main
   options, paths = receive_command_argument
-  paths.empty? ? output(count_stdin, options) : output(count_file(paths), options)
+  paths.empty? ? output(count_stdin, options) : output(calculate_file_text(paths), options)
 end
 
 def receive_command_argument
@@ -30,7 +30,7 @@ def count_stdin
   [count]
 end
 
-def count_file(paths)
+def calculate_file_text(paths)
   paths.map do |file_name|
     property = { line: 0, word: 0, byte: 0, name: '', directory: false }
     if FileTest.file?(file_name)
