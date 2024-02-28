@@ -78,9 +78,9 @@ def output_by_options(property, options, width)
   puts property[:name]
 end
 
-def calculate_total(counts)
+def calculate_total(file_properties)
   totals = { line: 0, word: 0, byte: 0, name: 'total', directory: false }
-  counts.each do |property|
+  file_properties.each do |property|
     totals[:line] += property[:line]
     totals[:word] += property[:word]
     totals[:byte] += property[:byte]
