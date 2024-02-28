@@ -6,7 +6,8 @@ require 'optparse'
 
 def main
   options, paths = parse_options
-  paths.empty? ? output(calculate_stdin, options) : output(calculate_file_text(paths), options)
+  paths.empty? ? calculate_stdin : calculate_file_text(paths)
+  output(file_properties, options)
 end
 
 def parse_options
@@ -56,7 +57,7 @@ def count_words(text)
 end
 
 def output(file_properties, options)
-  is_only_files = file_properties.none? { |property| property[:directory] == true }
+  is_only_files = file_properties.none? { |property| property[:directory] }
   is_only_files = file_properties[0].key?(:directory) if is_only_files
   width = is_only_files ? 5 : 8
   file_properties.each do |property|
