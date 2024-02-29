@@ -6,7 +6,7 @@ require 'optparse'
 
 def main
   options, paths = parse_options
-  paths.empty? ? calculate_stdin : calculate_file_text(paths)
+  file_properties = paths.empty? ? calculate_stdin : calculate_file_text(paths)
   output(file_properties, options)
 end
 
@@ -27,23 +27,21 @@ def calculate_stdin
     line: count_lines(input),
     word: count_words(input),
     byte: input.size,
-    name: '',
-    directory: false
+    name: nil,
+    directory: true
   }
   [property]
 end
 
 def calculate_file_text(paths)
   paths.map do |path|
-    property = { line: 0, word: 0, byte: 0 }
-    if FileTest.file?(path)
-      file_texts = File.read(path)
-      property[:line] = count_lines(file_texts)
-      property[:word] = count_words(file_texts)
-      property[:byte] = file_texts.size
+    property = { line: 0, word: 0, byte: 0, name: path, directory: FileTest.directory?(path) }
+    unless property[:directory]
+      file_text = File.read(path)
+      property[:line] = count_lines(file_text)
+      property[:word] = count_words(file_text)
+      property[:byte] = file_text.size
     end
-    property[:name] = path
-    property[:directory] = FileTest.directory?(path)
     property
   end
 end
@@ -58,10 +56,9 @@ end
 
 def output(file_properties, options)
   is_only_files = file_properties.none? { |property| property[:directory] }
-  is_only_files = file_properties[0].key?(:directory) if is_only_files
   width = is_only_files ? 5 : 8
   file_properties.each do |property|
-    puts "wc: #{property[:name]}: Is a directory" if property[:directory]
+    puts "wc: #{property[:name]}: Is a directory" if property[:directory] && property[:name]
     output_by_options(property, options, width)
   end
   return if file_properties.size == 1
