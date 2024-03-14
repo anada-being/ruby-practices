@@ -1,0 +1,17 @@
+- Shot
+  - mark
+
+  - score()
+
+- Frame
+  - shot
+
+  - score
+
+- Game
+  - frames
+
+  - parse_frames(score)
+  - calc
+  - strike
+  - spare
