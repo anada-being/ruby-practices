@@ -14,12 +14,12 @@ class Game
     frames = []
     9.times do
       frames << if frames_mark[0] == 'X'
-                  Frame.new(frames_mark.shift)
+                  Frame.new([frames_mark.shift])
                 else
-                  Frame.new(frames_mark.shift, frames_mark.shift)
+                  Frame.new(frames_mark.shift(2))
                 end
     end
-    frames << Frame.new(frames_mark[0], frames_mark[1], frames_mark[2])
+    frames << Frame.new(frames_mark)
     frames
   end
 
