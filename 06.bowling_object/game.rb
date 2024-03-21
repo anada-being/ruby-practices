@@ -13,16 +13,8 @@ class Game
 
   def parse_frames(score)
     marks = score.split(',')
-    frames = []
-    9.times do
-      frames << if marks[0] == 'X'
-                  Frame.new([marks.shift])
-                else
-                  Frame.new(marks.shift(2))
-                end
-    end
+    frames = (1..9).map { marks[0] == 'X' ? Frame.new([marks.shift]) : Frame.new(marks.shift(2)) }
     frames << Frame.new(marks)
-    frames
   end
 
   public
