@@ -9,19 +9,23 @@ class Game
     @frames = parse_frames(score)
   end
 
+  private
+
   def parse_frames(score)
-    frames_mark = score.split(',')
+    marks = score.split(',')
     frames = []
     9.times do
-      frames << if frames_mark[0] == 'X'
-                  Frame.new([frames_mark.shift])
+      frames << if marks[0] == 'X'
+                  Frame.new([marks.shift])
                 else
-                  Frame.new(frames_mark.shift(2))
+                  Frame.new(marks.shift(2))
                 end
     end
-    frames << Frame.new(frames_mark)
+    frames << Frame.new(marks)
     frames
   end
+
+  public
 
   def calc
     total_score = 0
