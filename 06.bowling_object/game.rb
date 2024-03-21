@@ -28,32 +28,18 @@ class Game
     @frames.each_with_index do |frame, count|
       total_score += frame.score
       next if frame.score != 10
+      next if count == 9
 
-      total_score += if frame.first_shot.mark == 'X'
-                       strike(count)
+      next_frame = @frames[count + 1]
+      total_score += if frame.shots[0].mark == 'X' && count == 8
+                       next_frame.shots[0].point + next_frame.shots[1].point
+                     elsif frame.shots[0].mark == 'X'
+                       frame.strike(next_frame, @frames[count + 2].shots)
                      else
-                       spare(count)
+                       frame.spare(next_frame.shots)
                      end
     end
     puts total_score
-  end
-
-  def strike(count)
-    return 0 if count > 8
-
-    next_frame = @frames[count + 1]
-    if count == 8 || next_frame.first_shot.mark != 'X'
-      Shot.new(next_frame.first_shot.mark).score + Shot.new(next_frame.second_shot.mark).score
-    else
-      after_next_shot = @frames[count + 2].first_shot.mark
-      10 + Shot.new(after_next_shot).score
-    end
-  end
-
-  def spare(count)
-    return 0 if count > 8
-
-    Shot.new(@frames[count + 1].first_shot.mark).score
   end
 end
 
