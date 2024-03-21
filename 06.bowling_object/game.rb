@@ -35,9 +35,9 @@ class Game
       next if frame_count == 9
 
       next_frame = @frames[frame_count + 1]
-      total_score += if frame.shots[0].mark == 'X' && frame_count == 8
+      total_score += if frame.shots[0].strike? && frame_count == 8
                        next_frame.shots[0].point + next_frame.shots[1].point
-                     elsif frame.shots[0].mark == 'X'
+                     elsif frame.shots[0].strike?
                        frame.strike(next_frame, @frames[frame_count + 2].shots)
                      else
                        frame.spare(next_frame.shots)

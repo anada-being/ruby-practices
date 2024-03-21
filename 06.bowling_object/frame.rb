@@ -14,11 +14,7 @@ class Frame
   end
 
   def strike(next_frame, after_next_shots)
-    if next_frame.shots[0].mark != 'X'
-      next_frame.score
-    else
-      10 + after_next_shots[0].point
-    end
+    next_frame.shots[0].strike? ? 10 + after_next_shots[0].point : next_frame.score
   end
 
   def spare(next_shots)
