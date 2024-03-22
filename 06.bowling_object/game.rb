@@ -9,16 +9,6 @@ class Game
     @frames = parse_frames(score)
   end
 
-  private
-
-  def parse_frames(score)
-    marks = score.split(',')
-    frames = (1..9).map { marks[0] == 'X' ? Frame.new([marks.shift]) : Frame.new(marks.shift(2)) }
-    frames << Frame.new(marks)
-  end
-
-  public
-
   def calc
     total_score = 0
     @frames.each_with_index do |frame, frame_count|
@@ -35,10 +25,18 @@ class Game
                        frame.spare(next_frame.shots)
                      end
     end
-    puts total_score
+    total_score
+  end
+
+  private
+
+  def parse_frames(score)
+    marks = score.split(',')
+    frames = (1..9).map { marks[0] == 'X' ? Frame.new([marks.shift]) : Frame.new(marks.shift(2)) }
+    [*frames, Frame.new(marks)]
   end
 end
 
 score = ARGV[0]
 game = Game.new(score)
-game.calc
+puts game.calc
