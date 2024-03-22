@@ -1,17 +1,19 @@
 - Shot
   - mark
 
-  - score()
+  - strike?()
+  - point()
 
 - Frame
-  - shot
+  - shots
 
-  - score
+  - score(scores, frame_count)
+  - sum_frame(shots)
+  - strike(next_shots, after_next_shots)
+  - spare(next_shots)
 
 - Game
   - frames
 
   - parse_frames(score)
-  - calc
-  - strike
-  - spare
+  - calc()
