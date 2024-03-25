@@ -15,13 +15,12 @@ class Frame
     return frame_score if frame_score != 10 || @frame_count == 10
 
     after_next_frame = @frame_count + 1
-    frame_score + if @shots[0].strike? && @frame_count == 9
-                    frames[@frame_count].shots[0, 2].sum(&:point)
-                  elsif @shots[0].strike?
-                    strike(frames[@frame_count].shots, frames[after_next_frame])
+    bonus_score = if @shots[0].strike?
+                    @frame_count == 9 ? frames[@frame_count].shots[0, 2].sum(&:point) : strike(frames[@frame_count].shots, frames[after_next_frame])
                   else
                     spare(frames[@frame_count].shots)
                   end
+    frame_score + bonus_score
   end
 
   private
