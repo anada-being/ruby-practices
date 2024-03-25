@@ -5,21 +5,22 @@ require './shot'
 class Frame
   attr_reader :shots
 
-  def initialize(shots)
+  def initialize(shots, frame_count)
     @shots = shots.map { |shot| Shot.new(shot) }
+    @frame_count = frame_count
   end
 
-  def score(scores, frame_count)
+  def score(frames)
     frame_score = sum_frame(@shots)
-    return frame_score if frame_score != 10 || frame_count == 9
+    return frame_score if frame_score != 10 || @frame_count == 10
 
-    next_frame = scores[frame_count + 1]
-    frame_score + if @shots[0].strike? && frame_count == 8
-                    sum_frame(next_frame.shots[0, 2])
+    next_frame = @frame_count + 1
+    frame_score + if @shots[0].strike? && @frame_count == 9
+                    sum_frame(frames[@frame_count].shots[0, 2])
                   elsif @shots[0].strike?
-                    strike(next_frame.shots, scores[frame_count + 2].shots)
+                    strike(frames[@frame_count].shots, frames[next_frame])
                   else
-                    spare(next_frame.shots)
+                    spare(frames[@frame_count].shots)
                   end
   end
 
