@@ -5,11 +5,7 @@ class Shot
     @mark = mark
   end
 
-  def strike?
-    @mark == 'X'
-  end
-
   def point
-    strike? ? 10 : @mark.to_i
+    @mark.to_i
   end
 end

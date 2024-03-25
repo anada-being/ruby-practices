@@ -19,8 +19,20 @@ class Game
 
   def parse_frames(score)
     marks = score.split(',')
-    frames = (1..9).map { |i| Shot.new(marks[0]).strike? ? Frame.new([marks.shift], i) : Frame.new(marks.shift(2), i) }
-    [*frames, Frame.new(marks, 10)]
+    frames = (1..9).map do |i|
+      if strike?(marks[0])
+        marks.shift
+        Frame.new(['10'], i, true)
+      else
+        Frame.new(marks.shift(2), i, false)
+      end
+    end
+    marks.map! { |mark| strike?(mark)? '10' : mark }
+    [*frames, Frame.new(marks, 10, false)]
+  end
+
+  def strike?(mark)
+    mark == 'X'
   end
 end
 
