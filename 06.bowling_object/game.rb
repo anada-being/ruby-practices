@@ -27,7 +27,7 @@ class Game
         Frame.new(marks.shift(2), i, false)
       end
     end
-    marks.map! { |mark| strike?(mark)? '10' : mark }
+    marks.map! { |mark| strike?(mark) ? '10' : mark }
     [*frames, Frame.new(marks, 10, false)]
   end
 
