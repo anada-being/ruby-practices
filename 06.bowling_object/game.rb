@@ -9,7 +9,7 @@ class Game
     @frames = parse_frames(score)
   end
 
-  def calc
+  def calc_total
     @frames.each.sum do |frame|
       frame.score(@frames)
     end
@@ -26,4 +26,4 @@ end
 
 score = ARGV[0]
 game = Game.new(score)
-puts game.calc
+puts game.calc_total
