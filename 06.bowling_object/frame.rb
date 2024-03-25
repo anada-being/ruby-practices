@@ -11,14 +11,14 @@ class Frame
   end
 
   def score(frames)
-    frame_score = sum_frame(@shots)
+    frame_score = @shots.sum(&:point)
     return frame_score if frame_score != 10 || @frame_count == 10
 
-    next_frame = @frame_count + 1
+    after_next_frame = @frame_count + 1
     frame_score + if @shots[0].strike? && @frame_count == 9
-                    sum_frame(frames[@frame_count].shots[0, 2])
+                    frames[@frame_count].shots[0, 2].sum(&:point)
                   elsif @shots[0].strike?
-                    strike(frames[@frame_count].shots, frames[next_frame])
+                    strike(frames[@frame_count].shots, frames[after_next_frame])
                   else
                     spare(frames[@frame_count].shots)
                   end
@@ -26,12 +26,8 @@ class Frame
 
   private
 
-  def sum_frame(shots)
-    shots.map(&:point).sum
-  end
-
   def strike(next_shots, after_next_shots)
-    next_shots[0].strike? ? 10 + after_next_shots[0].point : sum_frame(next_shots)
+    next_shots[0].strike? ? 10 + after_next_shots[0].point : next_shots.sum(&:point)
   end
 
   def spare(next_shots)
