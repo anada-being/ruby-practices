@@ -3,12 +3,11 @@
 require './shot'
 
 class Frame
-  attr_reader :shots, :is_strike
+  attr_reader :shots
 
-  def initialize(shots, frame_count, is_strike)
-    @shots = shots.map { |shot| Shot.new(shot) }
-    @frame_count = frame_count
-    @is_strike = is_strike
+  def initialize(shots, frame_number)
+    @shots = shots
+    @frame_number = frame_number
   end
 
   def score(frames)
