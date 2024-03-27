@@ -2,19 +2,19 @@
   - mark
 
   - point()
+  - strike?()
 
 - Frame
   - shots
   - frame_count
   - is_strike
+  - points
 
   - score(frames)
   - calc_strike(next_shots, after_next_shots)
-  - calc_spare(next_shots)
 
 - Game
   - frames
 
-  - parse_frames(score)
   - calc_total()
-  - strike?(mark)
+  - parse_frames(score)
