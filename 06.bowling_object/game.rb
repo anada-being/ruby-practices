@@ -18,15 +18,15 @@ class Game
   private
 
   def parse_frames(score)
-    marks = score.split(',').map { |mark| Shot.new(mark) }
+    shots = score.split(',').map { |mark| Shot.new(mark) }
     frames = (0..8).map do |i|
-      if marks[0].strike?
-        Frame.new([marks.shift], i)
+      if shots[0].strike?
+        Frame.new([shots.shift], i)
       else
-        Frame.new(marks.shift(2), i)
+        Frame.new(shots.shift(2), i)
       end
     end
-    [*frames, Frame.new(marks, 9)]
+    [*frames, Frame.new(shots, 9)]
   end
 end
 
