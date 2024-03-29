@@ -10,7 +10,7 @@ class Game
   end
 
   def calc_total
-    @frames.each.sum do |frame|
+    @frames.sum do |frame|
       frame.score(@frames)
     end
   end
@@ -20,11 +20,7 @@ class Game
   def parse_frames(score)
     shots = score.split(',').map { |mark| Shot.new(mark) }
     frames = (0..8).map do |i|
-      if shots[0].strike?
-        Frame.new([shots.shift], i)
-      else
-        Frame.new(shots.shift(2), i)
-      end
+      shots[0].strike? ? Frame.new([shots.shift], i) : Frame.new(shots.shift(2), i)
     end
     [*frames, Frame.new(shots, 9)]
   end
