@@ -7,11 +7,11 @@
 - Frame
   - shots
   - frame_count
-  - is_strike
-  - points
 
   - score(frames)
   - calc_strike(next_shots, after_next_shots)
+  - strike?
+  - points
 
 - Game
   - frames
