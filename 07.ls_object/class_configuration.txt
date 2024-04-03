@@ -1,0 +1,15 @@
+- FileStat
+  - file_name
+  - stat
+
+  - build_data()
+  - format_type()
+  - format_mode()
+
+- DirectoryStat
+  - directory_name
+  - stat
+
+  - build_data()
+  - format_type()
+  - format_mode()

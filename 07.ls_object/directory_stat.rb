@@ -15,7 +15,7 @@ MODE_TABLE = {
 
 class DirectoryStat
   def initialize(path)
-    @file_name = path
+    @directory_name = path
     @stat = File.stat(path)
   end
 
@@ -27,7 +27,7 @@ class DirectoryStat
       group: Etc.getgrgid(@stat.gid).name,
       size: @stat.size.to_s,
       mtime: @stat.mtime.strftime('%b %e %H:%M'),
-      basename: @file_name,
+      basename: @directory_name,
       blocks: @stat.blocks
     }
   end
