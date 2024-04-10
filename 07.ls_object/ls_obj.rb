@@ -58,10 +58,10 @@ end
 def format_row(data, max_nlink, max_user, max_group, max_size)
   [
     data[:type_and_mode],
-    "  #{data[:nlink].rjust(max_nlink)}",
+    " #{data[:nlink].rjust(max_nlink)}",
     " #{data[:user].ljust(max_user)}",
-    "  #{data[:group].ljust(max_group)}",
-    "  #{data[:size].rjust(max_size)}",
+    " #{data[:group].ljust(max_group)}",
+    " #{data[:size].rjust(max_size)}",
     " #{data[:mtime]}",
     " #{data[:basename]}"
   ].join
