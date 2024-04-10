@@ -28,7 +28,7 @@ end
 
 def collect_files(path, dot_match, reverse)
   filenames = dot_match ? Dir.foreach(path) : Dir.foreach(path).filter { |file| !file.start_with?('.') }
-  filenames.sort_by { |s| [s.downcase, s] }
+  filenames.to_a.sort_by { |s| [s.downcase, s] }
   reverse ? filenames.reverse : filenames
 end
 
