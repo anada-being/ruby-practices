@@ -33,7 +33,7 @@ class FileAndDirectory
     keys[key]
   end
 
-  def type_and_mode 
+  def type_and_mode
     "#{format_type}#{format_mode}"
   end
 

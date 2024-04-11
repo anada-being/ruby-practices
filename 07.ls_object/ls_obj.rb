@@ -32,16 +32,16 @@ def collect_files(path, dot_match, reverse)
 end
 
 def filename_sort(filenames)
-  filenames = filenames.sort do |a, b|
-      a = a.slice(1..-1) if a.start_with?('.') && !( a == '.' || a == '..' )
-      b = b.slice(1..-1) if b.start_with?('.') && !( a == '.' || a == '..' )
-      a <=> b
+  filenames.sort do |a, b|
+    a = a.slice(1..-1) if a.start_with?('.') && !['.', '..'].include?(a)
+    b = b.slice(1..-1) if b.start_with?('.') && !['.', '..'].include?(b)
+    a <=> b
   end
 end
 
 def list_long(filenames)
-  row_data = filenames.map {|filename| FileAndDirectory.new(filename) }
-  block_total = row_data.sum { |data| data.blocks } / 2
+  row_data = filenames.map { |filename| FileAndDirectory.new(filename) }
+  block_total = row_data.sum(&:blocks) / 2
   total = "total #{block_total}"
   body = format_body(row_data)
   [total, *body].join("\n")
