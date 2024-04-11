@@ -1,15 +1,14 @@
-- FileStat
-  - file_name
+- FileAndDirectory
+  - name
   - stat
 
-  - build_data()
-  - format_type()
-  - format_mode()
-
-- DirectoryStat
-  - directory_name
-  - stat
-
-  - build_data()
-  - format_type()
-  - format_mode()
+  - key_size(key)
+  - type_and_mode
+  - nlink
+  - user
+  - group
+  - file_size
+  - mtime
+  - blocks
+  - format_type
+  - format_mode
