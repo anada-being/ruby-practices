@@ -15,24 +15,32 @@ def main
   opt.on('-l') { |v| params[:long_format] = v }
   opt.on('-r') { |v| params[:reverse] = v }
   opt.parse!(ARGV)
-  path = ARGV[0] || '.'
+  path = '.'
 
   puts run_ls(path, **params)
 end
 
 def run_ls(path, dot_match: false, long_format: false, reverse: false)
   filenames = collect_files(path, dot_match, reverse)
-  long_format ? list_long(path, filenames) : list_short(filenames)
+  long_format ? list_long(filenames) : list_short(filenames)
 end
 
 def collect_files(path, dot_match, reverse)
   filenames = dot_match ? Dir.foreach(path).to_a : Dir.foreach(path).filter { |file| !file.start_with?('.') }
-  filenames = filenames.sort
+  filenames = filename_sort(filenames)
   reverse ? filenames.reverse : filenames
 end
 
-def list_long(path, filenames)
-  row_data = filenames.map {|filename| FileAndDirectory.new(path, filename) }
+def filename_sort(filenames)
+  filenames = filenames.sort do |a, b|
+      a = a.slice(1..-1) if a.start_with?('.') && !( a == '.' || a == '..' )
+      b = b.slice(1..-1) if b.start_with?('.') && !( a == '.' || a == '..' )
+      a <=> b
+  end
+end
+
+def list_long(filenames)
+  row_data = filenames.map {|filename| FileAndDirectory.new(filename) }
   block_total = row_data.sum { |data| data.blocks } / 2
   total = "total #{block_total}"
   body = format_body(row_data)

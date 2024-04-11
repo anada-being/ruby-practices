@@ -5,10 +5,9 @@ require 'etc'
 class FileAndDirectory
   attr_reader :name
 
-  def initialize(path, filename)
-    @path = "#{path}/#{filename}"
+  def initialize(filename)
     @name = filename
-    @stat = File.stat(path)
+    @stat = File.stat(filename)
   end
 
   MODE_TABLE = {
@@ -65,7 +64,7 @@ class FileAndDirectory
   private
 
   def format_type
-    File.file?(@path) ? 'f' : 'd'
+    File.file?(@name) ? 'f' : 'd'
   end
 
   def format_mode
