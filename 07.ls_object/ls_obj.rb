@@ -2,8 +2,7 @@
 
 # frozen_string_literal: true
 
-require './directory_stat'
-require './file_stat'
+require './file_and_directory'
 require 'optparse'
 
 MAX_ROW = 3
@@ -23,26 +22,18 @@ end
 
 def run_ls(path, dot_match: false, long_format: false, reverse: false)
   filenames = collect_files(path, dot_match, reverse)
-  long_format ? list_long(filenames) : list_short(filenames)
+  long_format ? list_long(path, filenames) : list_short(filenames)
 end
 
 def collect_files(path, dot_match, reverse)
   filenames = dot_match ? Dir.foreach(path).to_a : Dir.foreach(path).filter { |file| !file.start_with?('.') }
-  filenames.sort_by { |s| [s.downcase, s] }
+  filenames = filenames.sort
   reverse ? filenames.reverse : filenames
 end
 
-def list_long(filenames)
-  row_data = filenames.map do |filename|
-    if FileTest.directory?(filename)
-      directory = DirectoryStat.new(filename)
-      directory.build_data
-    else
-      file = FileStat.new(filename)
-      file.build_data
-    end
-  end
-  block_total = row_data.sum { |data| data[:blocks] } / 2
+def list_long(path, filenames)
+  row_data = filenames.map {|filename| FileAndDirectory.new(path, filename) }
+  block_total = row_data.sum { |data| data.blocks } / 2
   total = "total #{block_total}"
   body = format_body(row_data)
   [total, *body].join("\n")
@@ -50,20 +41,20 @@ end
 
 def format_body(row_data)
   max_sizes = %i[nlink user group size].map do |key|
-    row_data.map { |data| data[key].size }.max
+    row_data.map { |data| data.key_size(key.to_s) }.max
   end
   row_data.map { |data| format_row(data, *max_sizes) }
 end
 
 def format_row(data, max_nlink, max_user, max_group, max_size)
   [
-    data[:type_and_mode],
-    " #{data[:nlink].rjust(max_nlink)}",
-    " #{data[:user].ljust(max_user)}",
-    " #{data[:group].ljust(max_group)}",
-    " #{data[:size].rjust(max_size)}",
-    " #{data[:mtime]}",
-    " #{data[:basename]}"
+    data.type_and_mode,
+    " #{data.nlink.rjust(max_nlink)}",
+    " #{data.user.ljust(max_user)}",
+    " #{data.group.ljust(max_group)}",
+    " #{data.file_size.rjust(max_size)}",
+    " #{data.mtime}",
+    " #{data.name}"
   ].join
 end
 
