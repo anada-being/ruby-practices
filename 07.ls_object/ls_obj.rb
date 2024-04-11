@@ -35,7 +35,7 @@ def filename_sort(filenames)
   filenames.sort do |a, b|
     a = a.slice(1..-1) if a.start_with?('.') && !['.', '..'].include?(a)
     b = b.slice(1..-1) if b.start_with?('.') && !['.', '..'].include?(b)
-    a <=> b
+    a.downcase <=> b.downcase
   end
 end
 
