@@ -1,3 +1,16 @@
+- LS
+  - main
+  - run_ls(path, dot_match: false, long_format: false, reverse: false)
+  - collect_files(path, dot_match, reverse)
+  - sort_filename(filenames)
+  - list_long(filenames)
+  - format_body(file_etc_objects)
+  - key_size(file_etc_obj, key)
+  - format_row(file_etc_obj, max_nlink, max_user, max_group, max_size)
+  - list_short(filenames)
+  - safe_transpose(nested_file_names)
+  - format_table(filenames, max_filename_count)
+
 - FileEtc
   - name
   - stat
