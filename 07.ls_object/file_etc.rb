@@ -2,14 +2,7 @@
 
 require 'etc'
 
-class FileAndDirectory
-  attr_reader :name
-
-  def initialize(filename)
-    @name = filename
-    @stat = File.stat(filename)
-  end
-
+class FileEtc
   MODE_TABLE = {
     '0' => '---',
     '1' => '--x',
@@ -21,16 +14,11 @@ class FileAndDirectory
     '7' => 'rwx'
   }.freeze
 
-  def key_size(key)
-    keys = {
-      'nlink' => nlink.size,
-      'user' => user.size,
-      'group' => group.size,
-      'size' => file_size.size,
-      'mtime' => mtime.size,
-      'blocks' => blocks.size
-    }
-    keys[key]
+  attr_reader :name
+
+  def initialize(filename)
+    @name = filename
+    @stat = File.stat(filename)
   end
 
   def type_and_mode
@@ -38,7 +26,7 @@ class FileAndDirectory
   end
 
   def nlink
-    @stat.nlink.to_s
+    @stat.nlink
   end
 
   def user
@@ -50,7 +38,7 @@ class FileAndDirectory
   end
 
   def file_size
-    @stat.size.to_s
+    @stat.size
   end
 
   def mtime

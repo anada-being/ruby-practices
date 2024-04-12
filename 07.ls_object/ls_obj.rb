@@ -2,7 +2,7 @@
 
 # frozen_string_literal: true
 
-require './file_and_directory'
+require './file_etc'
 require 'optparse'
 
 MAX_ROW = 3
@@ -26,12 +26,13 @@ def run_ls(path, dot_match: false, long_format: false, reverse: false)
 end
 
 def collect_files(path, dot_match, reverse)
-  filenames = dot_match ? Dir.foreach(path).to_a : Dir.foreach(path).filter { |file| !file.start_with?('.') }
-  filenames = filename_sort(filenames)
-  reverse ? filenames.reverse : filenames
+  files = Dir.foreach(path)
+  filenames = dot_match ? files.to_a : files.filter { |file| !file.start_with?('.') }
+  filenames_sorted = sort_filename(filenames)
+  reverse ? filenames_sorted.reverse : filenames_sorted
 end
 
-def filename_sort(filenames)
+def sort_filename(filenames)
   filenames.sort do |a, b|
     a = a.slice(1..-1) if a.start_with?('.') && !['.', '..'].include?(a)
     b = b.slice(1..-1) if b.start_with?('.') && !['.', '..'].include?(b)
@@ -40,35 +41,48 @@ def filename_sort(filenames)
 end
 
 def list_long(filenames)
-  row_data = filenames.map { |filename| FileAndDirectory.new(filename) }
-  block_total = row_data.sum(&:blocks) / 2
+  file_etc_objects = filenames.map { |filename| FileEtc.new(filename) }
+  block_total = file_etc_objects.sum(&:blocks) / 2
   total = "total #{block_total}"
-  body = format_body(row_data)
+  body = format_body(file_etc_objects)
   [total, *body].join("\n")
 end
 
-def format_body(row_data)
+def format_body(file_etc_objects)
   max_sizes = %i[nlink user group size].map do |key|
-    row_data.map { |data| data.key_size(key.to_s) }.max
+    file_etc_objects.map { |file_etc_obj| key_size(file_etc_obj, key.to_s) }.max
   end
-  row_data.map { |data| format_row(data, *max_sizes) }
+  file_etc_objects.map { |file_etc_obj| format_row(file_etc_obj, *max_sizes) }
 end
 
-def format_row(data, max_nlink, max_user, max_group, max_size)
+def key_size(file_etc_obj, key)
+  keys = {
+    'nlink' => file_etc_obj.nlink.to_s.size,
+    'user' => file_etc_obj.user.size,
+    'group' => file_etc_obj.group.size,
+    'size' => file_etc_obj.file_size.to_s.size,
+    'mtime' => file_etc_obj.mtime.size,
+    'blocks' => file_etc_obj.blocks.size
+  }
+  keys[key]
+end
+
+def format_row(file_etc_obj, max_nlink, max_user, max_group, max_size)
   [
-    data.type_and_mode,
-    " #{data.nlink.rjust(max_nlink)}",
-    " #{data.user.ljust(max_user)}",
-    " #{data.group.ljust(max_group)}",
-    " #{data.file_size.rjust(max_size)}",
-    " #{data.mtime}",
-    " #{data.name}"
-  ].join
+    file_etc_obj.type_and_mode,
+    file_etc_obj.nlink.to_s.rjust(max_nlink),
+    file_etc_obj.user.ljust(max_user),
+    file_etc_obj.group.ljust(max_group),
+    file_etc_obj.file_size.to_s.rjust(max_size),
+    file_etc_obj.mtime,
+    file_etc_obj.name
+  ].join(" ")
 end
 
 def list_short(filenames)
   row_count = (filenames.count.to_f / MAX_ROW).ceil
-  transposed_filenames = safe_transpose(filenames.each_slice(row_count).to_a)
+  formatted_for_transpose = filenames.each_slice(row_count).to_a
+  transposed_filenames = safe_transpose(formatted_for_transpose)
   max_filename_count = filenames.map(&:size).max
   format_table(transposed_filenames, max_filename_count)
 end
@@ -79,7 +93,10 @@ end
 
 def format_table(filenames, max_filename_count)
   filenames.map do |row_files|
-    row_files.map { |file_name| file_name.to_s.ljust(max_filename_count + 1) }.join.rstrip
+    row_files
+      .map { |file_name| file_name.to_s.ljust(max_filename_count + 1) }
+      .join
+      .rstrip
   end.join("\n")
 end
 

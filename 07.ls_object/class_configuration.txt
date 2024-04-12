@@ -1,8 +1,7 @@
-- FileAndDirectory
+- FileEtc
   - name
   - stat
 
-  - key_size(key)
   - type_and_mode
   - nlink
   - user
