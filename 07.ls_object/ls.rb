@@ -62,7 +62,7 @@ class LS
       'user' => ls_file.user.size,
       'group' => ls_file.group.size,
       'size' => ls_file.file_size.to_s.size,
-      'mtime' => ls_file.mtime.size,
+      'mtime' => ls_file.mtime.strftime('%b %e %H:%M').size,
       'blocks' => ls_file.blocks.size
     }
     keys[key]
@@ -75,7 +75,7 @@ class LS
       ls_file.user.ljust(max_user),
       ls_file.group.ljust(max_group),
       ls_file.file_size.to_s.rjust(max_size),
-      ls_file.mtime,
+      ls_file.mtime.strftime('%b %e %H:%M'),
       ls_file.name
     ].join(' ')
   end
