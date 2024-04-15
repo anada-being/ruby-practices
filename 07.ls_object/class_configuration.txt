@@ -1,7 +1,7 @@
 - LS
   - main
   - collect_files(path, dot_match, reverse)
-  - sort_filename(filenames)
+  - sort_filenames(filenames)
   - list_long(filenames)
   - format_body(file_etc_objects)
   - key_size(file_etc_obj, key)
