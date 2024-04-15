@@ -27,11 +27,11 @@ class LS
   def collect_files(path, dot_match, reverse)
     all_filenames = Dir.foreach(path)
     filenames = dot_match ? all_filenames : all_filenames.reject { |file| file.start_with?('.') }
-    sorted_filenames = sort_filename(filenames)
+    sorted_filenames = sort_filenames(filenames)
     reverse ? sorted_filenames.reverse : sorted_filenames
   end
 
-  def sort_filename(filenames)
+  def sort_filenames(filenames)
     filenames.sort do |a, b|
       a = a.slice(1..-1) if a.start_with?('.') && !['.', '..'].include?(a)
       b = b.slice(1..-1) if b.start_with?('.') && !['.', '..'].include?(b)
