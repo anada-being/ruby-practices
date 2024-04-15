@@ -2,7 +2,7 @@
 
 # frozen_string_literal: true
 
-require './file_etc'
+require './ls_file'
 require 'optparse'
 
 class LS
@@ -42,7 +42,7 @@ class LS
   end
 
   def list_long(filenames)
-    file_etc_objects = filenames.map { |filename| FileEtc.new(filename) }
+    file_etc_objects = filenames.map { |filename| LSFile.new(filename) }
     block_total = file_etc_objects.sum(&:blocks) / 2
     total = "total #{block_total}"
     body = format_body(file_etc_objects)

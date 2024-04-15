@@ -11,7 +11,7 @@
   - safe_transpose(nested_file_names)
   - format_table(filenames, max_filename_count)
 
-- FileEtc
+- LSFile
   - name
   - stat
 
