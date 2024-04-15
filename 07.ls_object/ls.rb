@@ -42,41 +42,41 @@ class LS
   end
 
   def list_long(filenames)
-    file_etc_objects = filenames.map { |filename| LSFile.new(filename) }
-    block_total = file_etc_objects.sum(&:blocks) / 2
+    ls_file_objs = filenames.map { |filename| LSFile.new(filename) }
+    block_total = ls_file_objs.sum(&:blocks) / 2
     total = "total #{block_total}"
-    body = format_body(file_etc_objects)
+    body = format_body(ls_file_objs)
     [total, *body].join("\n")
   end
 
-  def format_body(file_etc_objects)
+  def format_body(ls_file_objs)
     max_sizes = %i[nlink user group size].map do |key|
-      file_etc_objects.map { |file_etc_obj| key_size(file_etc_obj, key.to_s) }.max
+      ls_file_objs.map { |ls_file| key_size(ls_file, key.to_s) }.max
     end
-    file_etc_objects.map { |file_etc_obj| format_row(file_etc_obj, *max_sizes) }
+    ls_file_objs.map { |ls_file| format_row(ls_file, *max_sizes) }
   end
 
-  def key_size(file_etc_obj, key)
+  def key_size(ls_file, key)
     keys = {
-      'nlink' => file_etc_obj.nlink.to_s.size,
-      'user' => file_etc_obj.user.size,
-      'group' => file_etc_obj.group.size,
-      'size' => file_etc_obj.file_size.to_s.size,
-      'mtime' => file_etc_obj.mtime.size,
-      'blocks' => file_etc_obj.blocks.size
+      'nlink' => ls_file.nlink.to_s.size,
+      'user' => ls_file.user.size,
+      'group' => ls_file.group.size,
+      'size' => ls_file.file_size.to_s.size,
+      'mtime' => ls_file.mtime.size,
+      'blocks' => ls_file.blocks.size
     }
     keys[key]
   end
 
-  def format_row(file_etc_obj, max_nlink, max_user, max_group, max_size)
+  def format_row(ls_file, max_nlink, max_user, max_group, max_size)
     [
-      file_etc_obj.type_and_mode,
-      file_etc_obj.nlink.to_s.rjust(max_nlink),
-      file_etc_obj.user.ljust(max_user),
-      file_etc_obj.group.ljust(max_group),
-      file_etc_obj.file_size.to_s.rjust(max_size),
-      file_etc_obj.mtime,
-      file_etc_obj.name
+      "#{ls_file.type}""#{ls_file.mode}",
+      ls_file.nlink.to_s.rjust(max_nlink),
+      ls_file.user.ljust(max_user),
+      ls_file.group.ljust(max_group),
+      ls_file.file_size.to_s.rjust(max_size),
+      ls_file.mtime,
+      ls_file.name
     ].join(' ')
   end
 
