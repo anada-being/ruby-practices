@@ -1,6 +1,5 @@
 - LS
   - main
-  - run_ls(path, dot_match: false, long_format: false, reverse: false)
   - collect_files(path, dot_match, reverse)
   - sort_filename(filenames)
   - list_long(filenames)
@@ -15,7 +14,8 @@
   - name
   - stat
 
-  - type_and_mode
+  - type
+  - mode
   - nlink
   - user
   - group
