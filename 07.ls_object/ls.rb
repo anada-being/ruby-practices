@@ -25,8 +25,8 @@ class LS
   private
 
   def collect_files(path, dot_match, reverse)
-    files = Dir.foreach(path)
-    filenames = dot_match ? files : files.reject { |file| file.start_with?('.') }
+    all_filenames = Dir.foreach(path)
+    filenames = dot_match ? all_filenames : all_filenames.reject { |file| file.start_with?('.') }
     sorted_filenames = sort_filename(filenames)
     reverse ? sorted_filenames.reverse : sorted_filenames
   end
