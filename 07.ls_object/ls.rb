@@ -18,19 +18,17 @@ class LS
     opt.parse!(ARGV)
     path = '.'
 
-    puts run_ls(path, **params)
+    collected_filenames = collect_files(path, params[:dot_match], params[:reverse])
+    puts params[:long_format] ? list_long(collected_filenames) : list_short(collected_filenames)
   end
 
-  def run_ls(path, dot_match: false, long_format: false, reverse: false)
-    filenames = collect_files(path, dot_match, reverse)
-    long_format ? list_long(filenames) : list_short(filenames)
-  end
+  private
 
   def collect_files(path, dot_match, reverse)
     files = Dir.foreach(path)
-    filenames = dot_match ? files.to_a : files.filter { |file| !file.start_with?('.') }
-    filenames_sorted = sort_filename(filenames)
-    reverse ? filenames_sorted.reverse : filenames_sorted
+    filenames = dot_match ? files : files.reject { |file| file.start_with?('.') }
+    sorted_filenames = sort_filename(filenames)
+    reverse ? sorted_filenames.reverse : sorted_filenames
   end
 
   def sort_filename(filenames)
@@ -57,15 +55,20 @@ class LS
   end
 
   def key_size(ls_file, key)
-    keys = {
-      'nlink' => ls_file.nlink.to_s.size,
-      'user' => ls_file.user.size,
-      'group' => ls_file.group.size,
-      'size' => ls_file.file_size.to_s.size,
-      'mtime' => ls_file.mtime.strftime('%b %e %H:%M').size,
-      'blocks' => ls_file.blocks.size
-    }
-    keys[key]
+    case key
+    when 'nlink'
+      ls_file.nlink.to_s.size
+    when 'user'
+      ls_file.user.size
+    when 'group'
+      ls_file.group.size
+    when 'size'
+      ls_file.file_size.to_s.size
+    when 'mtime'
+      ls_file.mtime.strftime('%b %e %H:%M').size
+    when 'blocks'
+      ls_file.blocks.size
+    end
   end
 
   def format_row(ls_file, max_nlink, max_user, max_group, max_size)
@@ -82,8 +85,8 @@ class LS
 
   def list_short(filenames)
     row_count = (filenames.count.to_f / MAX_ROW).ceil
-    formatted_for_transpose = filenames.each_slice(row_count).to_a
-    transposed_filenames = safe_transpose(formatted_for_transpose)
+    filenames_by_row = filenames.each_slice(row_count).to_a
+    transposed_filenames = safe_transpose(filenames_by_row)
     max_filename_count = filenames.map(&:size).max
     format_table(transposed_filenames, max_filename_count)
   end

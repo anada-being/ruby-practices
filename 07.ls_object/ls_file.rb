@@ -22,7 +22,7 @@ class LSFile
   end
 
   def type
-    File.file?(@name) ? 'f' : 'd'
+    File.file?(@name) ? '-' : 'd'
   end
 
   def mode
