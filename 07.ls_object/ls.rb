@@ -40,18 +40,18 @@ class LS
   end
 
   def list_long(filenames)
-    ls_file_objs = filenames.map { |filename| LSFile.new(filename) }
-    block_total = ls_file_objs.sum(&:blocks) / 2
+    ls_files = filenames.map { |filename| LSFile.new(filename) }
+    block_total = ls_files.sum(&:blocks) / 2
     total = "total #{block_total}"
-    body = format_body(ls_file_objs)
+    body = format_body(ls_files)
     [total, *body].join("\n")
   end
 
-  def format_body(ls_file_objs)
+  def format_body(ls_files)
     max_sizes = %i[nlink user group size].map do |key|
-      ls_file_objs.map { |ls_file| key_size(ls_file, key.to_s) }.max
+      ls_files.map { |ls_file| key_size(ls_file, key.to_s) }.max
     end
-    ls_file_objs.map { |ls_file| format_row(ls_file, *max_sizes) }
+    ls_files.map { |ls_file| format_row(ls_file, *max_sizes) }
   end
 
   def key_size(ls_file, key)
@@ -64,16 +64,12 @@ class LS
       ls_file.group.size
     when 'size'
       ls_file.file_size.to_s.size
-    when 'mtime'
-      ls_file.mtime.strftime('%b %e %H:%M').size
-    when 'blocks'
-      ls_file.blocks.size
     end
   end
 
   def format_row(ls_file, max_nlink, max_user, max_group, max_size)
     [
-      "#{ls_file.type}""#{ls_file.mode}",
+      "#{ls_file.type}#{ls_file.mode}",
       ls_file.nlink.to_s.rjust(max_nlink),
       ls_file.user.ljust(max_user),
       ls_file.group.ljust(max_group),
