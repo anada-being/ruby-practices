@@ -1,0 +1,26 @@
+- LS
+  - main
+  - collect_files(path, dot_match, reverse)
+  - sort_filenames(filenames)
+  - list_long(filenames)
+  - format_body(file_etc_objects)
+  - key_size(file_etc_obj, key)
+  - format_row(file_etc_obj, max_nlink, max_user, max_group, max_size)
+  - list_short(filenames)
+  - safe_transpose(nested_file_names)
+  - format_table(filenames, max_filename_count)
+
+- LSFile
+  - name
+  - stat
+
+  - type
+  - mode
+  - nlink
+  - user
+  - group
+  - file_size
+  - mtime
+  - blocks
+  - format_type
+  - format_mode
