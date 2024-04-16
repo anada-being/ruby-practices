@@ -48,10 +48,11 @@ class LS
   end
 
   def format_body(ls_files)
-    max_sizes = %i[nlink user group size].map do |key|
-      ls_files.map { |ls_file| key_size(ls_file, key.to_s) }.max
+    max_sizes = %i[nlink user group size].to_h do |key|
+      max = ls_files.map { |ls_file| key_size(ls_file, key.to_s) }.max
+      [key, max]
     end
-    ls_files.map { |ls_file| format_row(ls_file, *max_sizes) }
+    ls_files.map { |ls_file| format_row(ls_file, max_sizes) }
   end
 
   def key_size(ls_file, key)
@@ -67,13 +68,13 @@ class LS
     end
   end
 
-  def format_row(ls_file, max_nlink, max_user, max_group, max_size)
+  def format_row(ls_file, max_sizes)
     [
       "#{ls_file.type}#{ls_file.mode}",
-      ls_file.nlink.to_s.rjust(max_nlink),
-      ls_file.user.ljust(max_user),
-      ls_file.group.ljust(max_group),
-      ls_file.file_size.to_s.rjust(max_size),
+      ls_file.nlink.to_s.rjust(max_sizes[:nlink]),
+      ls_file.user.ljust(max_sizes[:user]),
+      ls_file.group.ljust(max_sizes[:group]),
+      ls_file.file_size.to_s.rjust(max_sizes[:size]),
       ls_file.mtime.strftime('%b %e %H:%M'),
       ls_file.name
     ].join(' ')
