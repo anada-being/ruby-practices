@@ -18,8 +18,8 @@ class LS
     opt.parse!(ARGV)
     path = '.'
 
-    filenames = collect_files(path, params[:dot_match], params[:reverse])
-    puts params[:long_format] ? list_long(filenames) : list_short(filenames)
+    files = collect_files(path, params[:dot_match], params[:reverse])
+    puts params[:long_format] ? list_long(files) : list_short(files)
   end
 
   private
