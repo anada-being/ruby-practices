@@ -18,16 +18,16 @@ class LS
     opt.parse!(ARGV)
     path = '.'
 
-    collected_filenames = collect_files(path, params[:dot_match], params[:reverse])
-    puts params[:long_format] ? list_long(collected_filenames) : list_short(collected_filenames)
+    filenames = collect_files(path, params[:dot_match], params[:reverse])
+    puts params[:long_format] ? list_long(filenames) : list_short(filenames)
   end
 
   private
 
   def collect_files(path, dot_match, reverse)
-    all_filenames = Dir.foreach(path)
-    filenames = dot_match ? all_filenames : all_filenames.reject { |file| file.start_with?('.') }
-    sorted_filenames = sort_filenames(filenames)
+    filenames = Dir.foreach(path)
+    selected_filenames = dot_match ? filenames : filenames.reject { |file| file.start_with?('.') }
+    sorted_filenames = sort_filenames(selected_filenames)
     reverse ? sorted_filenames.reverse : sorted_filenames
   end
 
